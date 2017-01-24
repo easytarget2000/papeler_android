@@ -7,11 +7,9 @@ import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by michelsievers on 23/01/2017.
@@ -19,130 +17,187 @@ import java.util.List;
 
 public class WallpapelerService extends WallpaperService {
 
+    private static final String TAG = WallpapelerService.class.getSimpleName();
+
+    private static final boolean VERBOSE = true;
+
     @Override
     public Engine onCreateEngine() {
+        Log.d(TAG, "onCreateEngine()");
         return new Pengine();
     }
 
     private class Pengine extends Engine {
-        private final Handler handler = new Handler();
-        private final Runnable drawRunner = new Runnable() {
+
+
+        private final Handler mHandler = new Handler();
+
+        private final Runnable mDrawRunnable = new Runnable() {
             @Override
             public void run() {
+                if (VERBOSE) {
+                    Log.d(TAG, "mDrawRunnable.run()");
+                }
                 draw();
             }
 
         };
-        private List<MyPoint> circles;
-        private Paint paint = new Paint();
-        private int width;
-        int height;
-        private boolean visible = true;
-        private int maxNumber;
-        private boolean touchEnabled;
 
-        public Pengine() {
-            SharedPreferences prefs = PreferenceManager
-                    .getDefaultSharedPreferences(WallpapelerService.this);
-            maxNumber = Integer
-                    .valueOf(prefs.getString("numberOfCircles", "4"));
-            touchEnabled = prefs.getBoolean("touch", false);
-            circles = new ArrayList<MyPoint>();
-            paint.setAntiAlias(true);
-            paint.setColor(Color.WHITE);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeJoin(Paint.Join.ROUND);
-            paint.setStrokeWidth(10f);
-            handler.post(drawRunner);
+//        private List<Drop> mPoints;
+
+        private Drop mDrop = new Drop("", -1000f, -1000f);
+
+        private Paint mPaint = new Paint();
+
+        private int mWidth;
+
+        int mHeight;
+
+        private boolean mVisible = true;
+
+        private boolean mTouched = false;
+
+        private long mFirstTouchMillis;
+
+        private int mMaxNumber;
+
+        Pengine() {
+
+            if (VERBOSE) {
+                Log.d(TAG, "Pengine()");
+            }
+
+            final SharedPreferences prefs;
+            prefs = PreferenceManager.getDefaultSharedPreferences(WallpapelerService.this);
+
+            mMaxNumber = Integer.valueOf(prefs.getString("numberOfCircles", "4"));
+//            mHandleTouch = prefs.getBoolean("touch", false);
+
+            mPaint.setAntiAlias(true);
+            mPaint.setColor(Color.WHITE);
+            mPaint.setStyle(Paint.Style.STROKE);
+            mPaint.setStrokeJoin(Paint.Join.ROUND);
+            mPaint.setStrokeWidth(10f);
+            mHandler.post(mDrawRunnable);
         }
 
         @Override
         public void onVisibilityChanged(boolean visible) {
-            this.visible = visible;
-            if (visible) {
-                handler.post(drawRunner);
+            mVisible = visible;
+
+            if (VERBOSE) {
+                Log.d(TAG, "Pengine.onVisibilityChanged(" + mVisible + ")");
+            }
+
+            if (mVisible) {
+                mHandler.post(mDrawRunnable);
             } else {
-                handler.removeCallbacks(drawRunner);
+                mHandler.removeCallbacks(mDrawRunnable);
             }
         }
 
         @Override
         public void onSurfaceDestroyed(SurfaceHolder holder) {
             super.onSurfaceDestroyed(holder);
-            this.visible = false;
-            handler.removeCallbacks(drawRunner);
+
+            Log.d(TAG, "Pengine.onSurfaceDestroyed(" + mVisible + ")");
+
+            mVisible = false;
+            mHandler.removeCallbacks(mDrawRunnable);
         }
 
         @Override
-        public void onSurfaceChanged(SurfaceHolder holder, int format,
-                                     int width, int height) {
-            this.width = width;
-            this.height = height;
-            super.onSurfaceChanged(holder, format, width, height);
+        public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+            mWidth = width;
+            mHeight = height;
+            mPaint.setStrokeWidth(mWidth * 0.01f);
+
+            if (VERBOSE) {
+                Log.d(TAG, "New Surface: " + format + ": " + mWidth + " x " + mHeight);
+            }
+
+            super.onSurfaceChanged(holder, format, mWidth, mHeight);
         }
 
         @Override
         public void onTouchEvent(MotionEvent event) {
-            if (touchEnabled) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                mTouched = true;
 
-                float x = event.getX();
-                float y = event.getY();
-                SurfaceHolder holder = getSurfaceHolder();
-                Canvas canvas = null;
-                try {
-                    canvas = holder.lockCanvas();
-                    if (canvas != null) {
-                        canvas.drawColor(Color.BLACK);
-                        circles.clear();
-                        circles.add(
-                                new MyPoint(
-                                        String.valueOf(circles.size() + 1),
-                                        x,
-                                        y
-                                )
-                        );
-                        drawCircles(canvas, circles);
-
-                    }
-                } finally {
-                    if (canvas != null)
-                        holder.unlockCanvasAndPost(canvas);
+                if (mFirstTouchMillis < 100L) {
+                    mFirstTouchMillis = System.currentTimeMillis();
                 }
-                super.onTouchEvent(event);
+
+                scheduleDraw();
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                mTouched = false;
+                return;
             }
+
+            mDrop.x = event.getX();
+            mDrop.y = event.getY();
+
+            super.onTouchEvent(event);
         }
 
         private void draw() {
-            SurfaceHolder holder = getSurfaceHolder();
+
+            if (VERBOSE) {
+                Log.d(TAG, "Pengine.draw()");
+            }
+
+            final SurfaceHolder holder = getSurfaceHolder();
             Canvas canvas = null;
+            mPaint.setColor((int) (System.currentTimeMillis() - mFirstTouchMillis));
+            mPaint.setAlpha(255);
+
             try {
                 canvas = holder.lockCanvas();
                 if (canvas != null) {
-                    if (circles.size() >= maxNumber) {
-                        circles.clear();
-                    }
-                    int x = (int) (width * Math.random());
-                    int y = (int) (height * Math.random());
-                    circles.add(new MyPoint(String.valueOf(circles.size() + 1),
-                            x, y));
-                    drawCircles(canvas, circles);
+                    drawDrop(canvas);
                 }
             } finally {
-                if (canvas != null)
+                if (canvas != null) {
                     holder.unlockCanvasAndPost(canvas);
+                }
             }
-            handler.removeCallbacks(drawRunner);
-            if (visible) {
-                handler.postDelayed(drawRunner, 5000);
+
+            scheduleDraw();
+        }
+
+        private void scheduleDraw() {
+            mHandler.removeCallbacks(mDrawRunnable);
+
+            if (mVisible && mTouched) {
+                mHandler.postDelayed(mDrawRunnable, 50L);
             }
         }
 
-        // Surface view requires that all elements are drawn completely
-        private void drawCircles(Canvas canvas, List<MyPoint> circles) {
-            canvas.drawColor(Color.BLACK);
-            for (MyPoint point : circles) {
-                canvas.drawCircle(point.x, point.y, 20.0f, paint);
-            }
+        private void drawDrop(Canvas canvas) {
+            canvas.drawCircle(
+                    mDrop.x,
+                    mDrop.y,
+                    (float) Math.random() * mWidth * 0.05f,
+                    mPaint
+            );
         }
+
+        // Surface view requires that all elements are drawn completely
+//        private void drawCircles(Canvas canvas) {
+////            canvas.drawColor(Color.BLACK);
+//            if (mPoints.size() > 100) {
+//                mPoints.clear();
+//            }
+//
+//            for (final Drop point : mPoints) {
+//                canvas.drawCircle(
+//                        point.x,
+//                        point.y,
+//                        (float) Math.random() * mWidth * 0.1f,
+//                        mPaint
+//                );
+//            }
+//        }
     }
 }
