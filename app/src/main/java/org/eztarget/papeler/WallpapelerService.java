@@ -23,7 +23,7 @@ public class WallpapelerService extends WallpaperService {
 
     private static final float MAX_TOUCH_AGE_FLOATIES = (float) MAX_TOUCH_AGE_MILLIS;
 
-    private static final int DENSITY = 5;
+    private static final int DENSITY = 20;
 
     private static final boolean VERBOSE = false;
 
@@ -89,7 +89,7 @@ public class WallpapelerService extends WallpaperService {
 
             mPaint.setAntiAlias(true);
             mPaint.setColor(Color.WHITE);
-//            mPaint.setStyle(Paint.Style.STROKE);
+            mPaint.setStyle(Paint.Style.STROKE);
 //            mPaint.setStrokeJoin(Paint.Join.ROUND);
             mPaint.setStrokeWidth(1f);
             mHandler.post(mDrawRunnable);
@@ -140,6 +140,9 @@ public class WallpapelerService extends WallpaperService {
         public void onTouchEvent(MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
+                mDrop.x = event.getX();
+                mDrop.y = event.getY();
+
                 if (mFirstTouchMillis < 100L) {
                     mFirstTouchMillis = System.currentTimeMillis();
                 }
@@ -153,8 +156,7 @@ public class WallpapelerService extends WallpaperService {
                 return;
             }
 
-            mDrop.x = event.getX();
-            mDrop.y = event.getY();
+
 
             super.onTouchEvent(event);
         }
@@ -230,21 +232,21 @@ public class WallpapelerService extends WallpaperService {
 //            canvas.drawCircle(
 //                    mDrop.x,
 //                    mDrop.y,
-//                    (float) Math.random() * mWidth * 0.05f,
+//                    (float) Math.random() * mWidth * 0.04f,
 //                    mPaint
 //            );
 
 //            Log.d(TAG, "drawDrop " + mDrop.x + ", " + mDrop.y);
 
 //            final float spread = (float) Math.random() * mWidth * 0.1f;
-            float xDistance;
-            float yDistance;
+            double angle;
+            float radius;
             for (int i = 0; i < DENSITY; i++) {
-                xDistance = ((float) Math.random() * mSpread);
-                yDistance = ((float) Math.random() * mSpread) * (xDistance / mSpread);
+                angle =  Math.random() * Math.PI * 2;
+                radius = mSpread * (float) Math.random() + 0.2f;
                 canvas.drawPoint(
-                        mDrop.x + xDistance - mSpreadHalf,
-                        mDrop.y + yDistance - mSpreadHalf,
+                        mDrop.x + (float) Math.cos(angle) * radius,
+                        mDrop.y + (float) Math.sin(angle) * radius,
                         mPaint
                 );
             }
