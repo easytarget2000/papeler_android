@@ -24,7 +24,7 @@ public class WallpapelerService extends WallpaperService {
 
     private static final float MAX_TOUCH_AGE_FLOATIES = (float) MAX_TOUCH_AGE_MILLIS;
 
-    private static final int DENSITY = 20;
+    private static final int DENSITY = 10;
 
     private static final boolean VERBOSE = false;
 
@@ -102,7 +102,7 @@ public class WallpapelerService extends WallpaperService {
             mHandler.post(mDrawRunnable);
 
             mBitmapPaint.setColor(Color.WHITE);
-            mBitmapPaint.setAntiAlias(true);
+            //mBitmapPaint.setAntiAlias(true);
         }
 
         @Override
@@ -136,12 +136,13 @@ public class WallpapelerService extends WallpaperService {
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
             mWidth = width;
-            mSpread = mWidth * 0.1f;
+            mSpread = mWidth * 0.4f;
             mSpreadHalf = mSpread * 0.5f;
             mHeight = height;
 
             mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ALPHA_8);
             mCanvas = new Canvas(mBitmap);
+
 
 //            mPaint.setStrokeWidth(mWidth * 0.01f);
 
@@ -197,12 +198,6 @@ public class WallpapelerService extends WallpaperService {
 //            final long now = System.currentTimeMillis();
 //            mPaint.setColor((int) (now - mFirstTouchMillis));
 //            mPaint.setAlpha((int) (50 * getAgeFactor()));
-
-            final int brightness = (int) (50 * getAgeFactor());
-
-            mPaint.setColor(
-                    Color.argb(255, brightness, brightness, brightness)
-            );
 
             try {
                 canvas = holder.lockCanvas();
@@ -265,6 +260,10 @@ public class WallpapelerService extends WallpaperService {
 //            Log.d(TAG, "drawDrop " + mDrop.x + ", " + mDrop.y);
 
 //            final float spread = (float) Math.random() * mWidth * 0.1f;
+
+            final int brightness = (int) (50 * getAgeFactor());
+            mPaint.setAlpha(brightness);
+
             double angle;
             float radius;
             for (int i = 0; i < DENSITY; i++) {
