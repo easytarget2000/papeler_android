@@ -1,6 +1,7 @@
 package org.eztarget.papeler;
 
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -55,6 +56,8 @@ public class WallpapelerService extends WallpaperService {
 
         private Paint mPaint = new Paint();
 
+        private Paint mBitmapPaint = new Paint();
+
         private int mWidth;
 
         private int mHeight;
@@ -75,6 +78,10 @@ public class WallpapelerService extends WallpaperService {
 
         private int mMaxNumber;
 
+        private Bitmap mBitmap;
+
+        private Canvas mCanvas;
+
         Pengine() {
 
             if (VERBOSE) {
@@ -93,6 +100,9 @@ public class WallpapelerService extends WallpaperService {
 //            mPaint.setStrokeJoin(Paint.Join.ROUND);
             mPaint.setStrokeWidth(1f);
             mHandler.post(mDrawRunnable);
+
+            mBitmapPaint.setColor(Color.WHITE);
+            mBitmapPaint.setAntiAlias(true);
         }
 
         @Override
@@ -120,6 +130,8 @@ public class WallpapelerService extends WallpaperService {
             mHandler.removeCallbacks(mDrawRunnable);
         }
 
+        private int mDebugDrawCounter;
+
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
@@ -127,7 +139,14 @@ public class WallpapelerService extends WallpaperService {
             mSpread = mWidth * 0.1f;
             mSpreadHalf = mSpread * 0.5f;
             mHeight = height;
+
+            mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ALPHA_8);
+            mCanvas = new Canvas(mBitmap);
+
 //            mPaint.setStrokeWidth(mWidth * 0.01f);
+
+
+            mDebugDrawCounter = 0;
 
             if (VERBOSE) {
                 Log.d(TAG, "New Surface: " + format + ": " + mWidth + " x " + mHeight);
@@ -175,14 +194,21 @@ public class WallpapelerService extends WallpaperService {
 
             final SurfaceHolder holder = getSurfaceHolder();
             Canvas canvas = null;
-            final long now = System.currentTimeMillis();
+//            final long now = System.currentTimeMillis();
 //            mPaint.setColor((int) (now - mFirstTouchMillis));
-            mPaint.setAlpha((int) (100 * getAgeFactor()));
+//            mPaint.setAlpha((int) (50 * getAgeFactor()));
+
+            final int brightness = (int) (50 * getAgeFactor());
+
+            mPaint.setColor(
+                    Color.argb(255, brightness, brightness, brightness)
+            );
 
             try {
                 canvas = holder.lockCanvas();
                 if (canvas != null) {
-                    drawDrop(canvas);
+                    drawDrop(mCanvas);
+                    canvas.drawBitmap(mBitmap, 0f, 0f, mBitmapPaint);
                 }
             } finally {
                 if (canvas != null) {
@@ -232,7 +258,7 @@ public class WallpapelerService extends WallpaperService {
 //            canvas.drawCircle(
 //                    mDrop.x,
 //                    mDrop.y,
-//                    (float) Math.random() * mWidth * 0.04f,
+//                    mDebugDrawCounter,
 //                    mPaint
 //            );
 
