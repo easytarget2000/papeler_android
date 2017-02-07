@@ -8,9 +8,12 @@ import android.graphics.Paint;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
+
+import java.util.ArrayList;
 
 /**
  * Created by michelsievers on 23/01/2017.
@@ -39,20 +42,19 @@ public class WallpapelerService extends WallpaperService {
 
         private final Handler mHandler = new Handler();
 
-        private final Runnable mDrawRunnable = new Runnable() {
+        private final Runnable mUpdateRunnable = new Runnable() {
             @Override
             public void run() {
 //                if (VERBOSE) {
-//                    Log.d(TAG, "mDrawRunnable.run()");
+//                    Log.d(TAG, "mUpdateRunnable.run()");
 //                }
+                update();
                 draw();
             }
 
         };
 
-//        private List<Drop> mPoints;
-
-        private Drop mDrop = new Drop("", -1000f, -1000f);
+        private ArrayList<Drop> mDrops = new ArrayList<>();
 
         private Paint mPaint = new Paint();
 
@@ -99,7 +101,7 @@ public class WallpapelerService extends WallpaperService {
             mPaint.setStyle(Paint.Style.STROKE);
 //            mPaint.setStrokeJoin(Paint.Join.ROUND);
             mPaint.setStrokeWidth(1f);
-            mHandler.post(mDrawRunnable);
+            mHandler.post(mUpdateRunnable);
 
             mBitmapPaint.setColor(Color.WHITE);
             //mBitmapPaint.setAntiAlias(true);
@@ -114,9 +116,9 @@ public class WallpapelerService extends WallpaperService {
             }
 
             if (mVisible) {
-                mHandler.post(mDrawRunnable);
+                mHandler.post(mUpdateRunnable);
             } else {
-                mHandler.removeCallbacks(mDrawRunnable);
+                mHandler.removeCallbacks(mUpdateRunnable);
             }
         }
 
@@ -127,7 +129,7 @@ public class WallpapelerService extends WallpaperService {
             Log.d(TAG, "Pengine.onSurfaceDestroyed(" + mVisible + ")");
 
             mVisible = false;
-            mHandler.removeCallbacks(mDrawRunnable);
+            mHandler.removeCallbacks(mUpdateRunnable);
         }
 
         private int mDebugDrawCounter;
@@ -160,8 +162,15 @@ public class WallpapelerService extends WallpaperService {
         public void onTouchEvent(MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-                mDrop.x = event.getX();
-                mDrop.y = event.getY();
+                final Drop firstDrop;
+                if (mDrops.isEmpty()) {
+                    firstDrop = null;
+                } else {
+                    firstDrop = mDrops.get(0);
+                }
+
+                final Drop dropUnderTouch = new Drop(event.getX(), event.getY(), mWidth, firstDrop);
+                mDrops.add(dropUnderTouch);
 
                 if (mFirstTouchMillis < 100L) {
                     mFirstTouchMillis = System.currentTimeMillis();
@@ -182,7 +191,6 @@ public class WallpapelerService extends WallpaperService {
         }
 
         private void draw() {
-
             if (mDrawing) {
                 return;
             }
@@ -199,11 +207,18 @@ public class WallpapelerService extends WallpaperService {
 //            mPaint.setColor((int) (now - mFirstTouchMillis));
 //            mPaint.setAlpha((int) (50 * getAgeFactor()));
 
+            boolean scheduleDraw = false;
             try {
                 canvas = holder.lockCanvas();
                 if (canvas != null) {
-                    drawDrop(mCanvas);
-                    canvas.drawBitmap(mBitmap, 0f, 0f, mBitmapPaint);
+                    for (final Drop drop : mDrops) {
+                        if (drop.update()) {
+                            scheduleDraw = true;
+                            drop.draw(mCanvas, mPaint);
+                            canvas.drawBitmap(mBitmap, 0f, 0f, mBitmapPaint);
+                        }
+                    }
+
                 }
             } finally {
                 if (canvas != null) {
@@ -212,7 +227,9 @@ public class WallpapelerService extends WallpaperService {
                 mDrawing = false;
             }
 
-            scheduleDraw();
+            if (scheduleDraw) {
+                scheduleDraw();
+            }
         }
 
         private void scheduleDraw() {
@@ -221,11 +238,15 @@ public class WallpapelerService extends WallpaperService {
                 Log.d(TAG, "Pengine.scheduleDraw()");
             }
 
-            mHandler.removeCallbacks(mDrawRunnable);
+            mHandler.removeCallbacks(mUpdateRunnable);
 
-            if (mVisible && getAgeFactor() > 0.1f) {
-                mHandler.postDelayed(mDrawRunnable, 30L);
+            if (mVisible) {
+                mHandler.postDelayed(mUpdateRunnable, 20L);
             }
+        }
+
+        private void update() {
+
         }
 
         private float getAgeFactor() {
@@ -249,32 +270,26 @@ public class WallpapelerService extends WallpaperService {
             }
         }
 
-        private void drawDrop(Canvas canvas) {
-//            canvas.drawCircle(
-//                    mDrop.x,
-//                    mDrop.y,
-//                    mDebugDrawCounter,
-//                    mPaint
-//            );
+        private void drawDrop(@NonNull Canvas canvas, @NonNull final Drop drop) {
 
 //            Log.d(TAG, "drawDrop " + mDrop.x + ", " + mDrop.y);
 
 //            final float spread = (float) Math.random() * mWidth * 0.1f;
 
-            final int brightness = (int) (50 * getAgeFactor());
-            mPaint.setAlpha(brightness);
-
-            double angle;
-            float radius;
-            for (int i = 0; i < DENSITY; i++) {
-                angle =  Math.random() * Math.PI * 2;
-                radius = mSpread * (float) Math.random() + 0.2f;
-                canvas.drawPoint(
-                        mDrop.x + (float) Math.cos(angle) * radius,
-                        mDrop.y + (float) Math.sin(angle) * radius,
-                        mPaint
-                );
-            }
+//            final int brightness = (int) (50 * getAgeFactor());
+//            mPaint.setAlpha(brightness);
+//
+//            double angle;
+//            float radius;
+//            for (int i = 0; i < DENSITY; i++) {
+//                angle =  Math.random() * Math.PI * 2;
+//                radius = mSpread * (float) Math.random() + 0.2f;
+//                canvas.drawPoint(
+//                        mDrop.x + (float) Math.cos(angle) * radius,
+//                        mDrop.y + (float) Math.sin(angle) * radius,
+//                        mPaint
+//                );
+//            }
         }
 
         // Surface view requires that all elements are drawn completely
