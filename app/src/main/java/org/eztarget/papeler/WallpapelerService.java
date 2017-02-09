@@ -1,12 +1,10 @@
 package org.eztarget.papeler;
 
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -68,7 +66,7 @@ public class WallpapelerService extends WallpaperService {
 
         private boolean mVisible = true;
 
-        private boolean mTouching = false;
+        private boolean mIsTouching = false;
 
         private long mLastTouchMillis;
 
@@ -87,9 +85,6 @@ public class WallpapelerService extends WallpaperService {
             if (VERBOSE) {
                 Log.d(TAG, "Pengine()");
             }
-
-            final SharedPreferences prefs;
-            prefs = PreferenceManager.getDefaultSharedPreferences(WallpapelerService.this);
 
             mPaint1.setAntiAlias(true);
             mPaint1.setColor(Color.WHITE);
@@ -163,13 +158,13 @@ public class WallpapelerService extends WallpaperService {
                     mFirstTouchMillis = System.currentTimeMillis();
                 }
 
-                mTouching = true;
+                mIsTouching = true;
                 mLastTouchMillis = System.currentTimeMillis();
 
                 scheduleDrawIfReady();
 
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                mTouching = false;
+                mIsTouching = false;
                 return;
             }
 
@@ -203,7 +198,7 @@ public class WallpapelerService extends WallpaperService {
                 mDrawing = false;
             }
 
-            final boolean hadMovement = mLine.update();
+            final boolean hadMovement = mLine.update(mIsTouching);
             if (hadMovement) {
                 scheduleDrawIfReady();
             }
@@ -228,7 +223,7 @@ public class WallpapelerService extends WallpaperService {
 
         private float getAgeFactor() {
 
-            if (mTouching) {
+            if (mIsTouching) {
                 return 1f;
             }
 
