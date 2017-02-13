@@ -88,12 +88,12 @@ public class WallpapelerService extends WallpaperService {
 
             mPaint1.setAntiAlias(true);
             mPaint1.setColor(Color.WHITE);
-            mPaint1.setAlpha(20);
+            mPaint1.setAlpha(200);
             mPaint1.setStyle(Paint.Style.STROKE);
             mPaint1.setStrokeWidth(1f);
 
             mPaint2.setAntiAlias(true);
-            mPaint2.setAlpha(10);
+            mPaint2.setAlpha(180);
             mPaint2.setStyle(Paint.Style.STROKE);
             mPaint2.setStrokeWidth(1f);
 
@@ -152,7 +152,7 @@ public class WallpapelerService extends WallpaperService {
                 mLine = new Line(event.getX(), event.getY(), canvasSize);
 
                 final Random rnd = new Random();
-                mPaint2.setARGB(10, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+                mPaint2.setARGB(180, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
 
                 if (mFirstTouchMillis < 100L) {
                     mFirstTouchMillis = System.currentTimeMillis();
@@ -190,6 +190,7 @@ public class WallpapelerService extends WallpaperService {
                 if (canvas != null) {
                     mLine.draw(mCanvas, mPaint1, mPaint2);
                     canvas.drawBitmap(mBitmap, 0f, 0f, null);
+                    mCanvas.drawColor(Color.BLACK);
                 }
             } finally {
                 if (canvas != null) {
