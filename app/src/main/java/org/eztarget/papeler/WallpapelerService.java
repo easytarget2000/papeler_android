@@ -21,6 +21,12 @@ public class WallpapelerService extends WallpaperService {
 
     private static final String TAG = WallpapelerService.class.getSimpleName();
 
+    private static final boolean CLEAR_FRAME = false;
+
+    private static final int PAINT_1_ALPHA = CLEAR_FRAME ? 200 : 20;
+
+    private static final int PAINT_2_ALPHA = CLEAR_FRAME ? 180 : 10;
+
     private static final long MAX_TOUCH_AGE_MILLIS = 3L * 1000L;
 
     private static final float MAX_TOUCH_AGE_FLOATIES = (float) MAX_TOUCH_AGE_MILLIS;
@@ -88,12 +94,12 @@ public class WallpapelerService extends WallpaperService {
 
             mPaint1.setAntiAlias(true);
             mPaint1.setColor(Color.WHITE);
-            mPaint1.setAlpha(200);
+            mPaint1.setAlpha(PAINT_1_ALPHA);
             mPaint1.setStyle(Paint.Style.STROKE);
             mPaint1.setStrokeWidth(1f);
 
             mPaint2.setAntiAlias(true);
-            mPaint2.setAlpha(180);
+            mPaint2.setAlpha(PAINT_2_ALPHA);
             mPaint2.setStyle(Paint.Style.STROKE);
             mPaint2.setStrokeWidth(1f);
 
@@ -152,7 +158,12 @@ public class WallpapelerService extends WallpaperService {
                 mLine = new Line(event.getX(), event.getY(), canvasSize);
 
                 final Random rnd = new Random();
-                mPaint2.setARGB(180, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+                mPaint2.setARGB(
+                        PAINT_2_ALPHA,
+                        rnd.nextInt(256),
+                        rnd.nextInt(256),
+                        rnd.nextInt(256)
+                );
 
                 if (mFirstTouchMillis < 100L) {
                     mFirstTouchMillis = System.currentTimeMillis();
@@ -190,7 +201,10 @@ public class WallpapelerService extends WallpaperService {
                 if (canvas != null) {
                     mLine.draw(mCanvas, mPaint1, mPaint2);
                     canvas.drawBitmap(mBitmap, 0f, 0f, null);
-                    mCanvas.drawColor(Color.BLACK);
+
+                    if (CLEAR_FRAME) {
+                        mCanvas.drawColor(Color.BLACK);
+                    }
                 }
             } finally {
                 if (canvas != null) {
