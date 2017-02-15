@@ -21,7 +21,7 @@ public class WallpapelerService extends WallpaperService {
 
     private static final String TAG = WallpapelerService.class.getSimpleName();
 
-    private static final boolean CLEAR_FRAME = true;
+    private static final boolean CLEAR_FRAME = false;
 
     private static final int PAINT_1_ALPHA = CLEAR_FRAME ? 200 : 20;
 
@@ -33,7 +33,7 @@ public class WallpapelerService extends WallpaperService {
 
     private static final int DENSITY = 10;
 
-    private static final boolean VERBOSE = false;
+    private static final boolean VERBOSE = true;
 
     @Override
     public Engine onCreateEngine() {
@@ -189,6 +189,7 @@ public class WallpapelerService extends WallpaperService {
 
             mDrawing = true;
 
+            final long startMillis = System.currentTimeMillis();
             if (VERBOSE) {
                 Log.d(TAG, "Pengine.draw()");
             }
@@ -211,6 +212,10 @@ public class WallpapelerService extends WallpaperService {
                     holder.unlockCanvasAndPost(canvas);
                 }
                 mDrawing = false;
+            }
+
+            if (VERBOSE) {
+                Log.d(TAG, "Pengine.draw() took " + (System.currentTimeMillis() - startMillis) + "ms.");
             }
 
             final boolean hadMovement = mLine.update(mIsTouching);

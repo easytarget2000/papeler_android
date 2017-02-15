@@ -3,7 +3,6 @@ package org.eztarget.papeler;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import java.util.Random;
 
@@ -40,11 +39,9 @@ public class Line {
     Line(final float x, final float y, final float canvasSize) {
 
         mCanvasSize = canvasSize;
-        mNodeSize = 8f;
+        mNodeSize = 4f;
         mNodeRadius = mNodeSize * 0.5f;
-        mMaxPushDistance = canvasSize * 0.2f;
-
-        Log.d("Line()", "Node radius: " + mNodeRadius);
+        mMaxPushDistance = canvasSize * 0.1f;
 
         final float initialRadius = random(mCanvasSize * 0.05f) + mCanvasSize * 0.05f;
 //        final float initialAngle = random((float) Math.PI * 2);
@@ -92,7 +89,7 @@ public class Line {
             final Node nextNode = currentNode.mNext;
 
             canvas.drawLine(currentNode.mX, currentNode.mY, nextNode.mX, nextNode.mY, paint1);
-            canvas.drawCircle(currentNode.mX, currentNode.mY, mNodeRadius, paint2);
+//            canvas.drawCircle(currentNode.mX, currentNode.mY, mNodeRadius, paint2);
 
             currentNode = nextNode;
         } while (currentNode != mFirstNode);
@@ -102,10 +99,16 @@ public class Line {
 
         ++mAge;
 
+        int nodeCounter = 0;
         Node currentNode = mFirstNode;
         do {
             currentNode.update(!isTouching);
             currentNode = currentNode.mNext;
+
+            if (++nodeCounter % 20 == 0) {
+                addNodeNextTo(currentNode);
+            }
+
         } while (currentNode != mFirstNode);
 
 //        if (!isTouching && mAge % 2 == 0) {
@@ -133,6 +136,17 @@ public class Line {
 //        }
 
         return mAge < 200;
+    }
+
+    private void addNodeNextTo(final Node node) {
+        final Node oldNeighbour = node.mNext;
+        final Node newNeighbour = new Node();
+
+        newNeighbour.mX = (node.mX + oldNeighbour.mX) * 0.5f;
+        newNeighbour.mY = (node.mY + oldNeighbour.mY) * 0.5f;
+
+        node.mNext = newNeighbour;
+        newNeighbour.mNext = oldNeighbour;
     }
 
     private static float random(final float maxValue) {
@@ -224,9 +238,9 @@ public class Line {
                 } else {
 
                     if (distance < mNodeRadius) {
-                        force = 0f;
+                        force = -mNodeRadius;
                     } else {
-                        force = 0f;
+                        force = -1f / distance;
                     }
 //                    force = -mNodeRadius * 0.5f;
                 }
