@@ -15,7 +15,7 @@ public class Line {
 
     private static final int NUM_OF_INITIAL_NODES = 40;
 
-//    private ArrayList<Node> mNodes = new ArrayList<>();
+    private static final float TWO_PI = (float) Math.PI * 2f;
 
     private Node mFirstNode;
 
@@ -27,7 +27,7 @@ public class Line {
 
     private float mNodeRadius;
 
-    private float mFavouriteNeighbourDistance;
+    private float mPreferredNeighbourDistance;
 
     private float mMaxPushDistance;
 
@@ -42,13 +42,11 @@ public class Line {
         mCanvasSize = canvasSize;
         mNodeSize = 8f;
         mNodeRadius = mNodeSize * 0.5f;
-        mFavouriteNeighbourDistance = mNodeSize * 1.5f;
         mMaxPushDistance = canvasSize * 0.2f;
 
         Log.d("Line()", "Node radius: " + mNodeRadius);
-        Log.d("Line()", "Favourite neighbour distance: " + mFavouriteNeighbourDistance);
 
-        final float initialRadius = random(mCanvasSize * 0.05f) + mCanvasSize * 0.03f;
+        final float initialRadius = random(mCanvasSize * 0.05f) + mCanvasSize * 0.05f;
 //        final float initialAngle = random((float) Math.PI * 2);
         mJitter = mCanvasSize * 0.001f;
 
@@ -56,7 +54,7 @@ public class Line {
         for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
             final Node node = new Node();
 
-            final float angleOfNode = (float) Math.PI * 2f * ((i + 1f) / NUM_OF_INITIAL_NODES);
+            final float angleOfNode = TWO_PI * ((i + 1f) / NUM_OF_INITIAL_NODES);
 
             node.mX = x
                     + ((float) Math.cos(angleOfNode) * initialRadius)
@@ -65,13 +63,12 @@ public class Line {
                     + ((float) Math.sin(angleOfNode) * initialRadius)
                     + mJitter * 0.5f - random(mJitter);
 
-//            Log.d("Line()", "New: " + node);
-
             if (mFirstNode == null) {
                 mFirstNode = node;
                 lastNode = node;
 //                Log.d("Line()", "First node.");
             } else if (i == NUM_OF_INITIAL_NODES - 1) {
+                mPreferredNeighbourDistance = node.distance(lastNode);
                 lastNode.mNext = node;
                 node.mNext = mFirstNode;
 //                Log.d("Line()", "Connected last node to " + node.mNext + ".");
@@ -135,7 +132,7 @@ public class Line {
 //            Log.d("Line.update()", mInsertionIndex + " -> New: " + newMiddleNode + " between " + node1 + " and " + node2 + ".");
 //        }
 
-        return mAge < 20;
+        return mAge < 200;
     }
 
     private static float random(final float maxValue) {
@@ -173,7 +170,16 @@ public class Line {
 
         private float angle(final Node otherNode) {
 
-            return (float) Math.atan2(otherNode.mY - mY, otherNode.mX - mX);
+            final float calcAngle = (float) Math.atan2(
+                    -(mY - otherNode.mY),
+                    otherNode.mX - mX
+            );
+
+            if (calcAngle < 0) {
+                return calcAngle + TWO_PI;
+            } else {
+                return calcAngle;
+            }
         }
 
         private void update(final boolean applyForces) {
@@ -194,25 +200,39 @@ public class Line {
                 }
 
                 final float distance = distance(otherNode);
-                final float angle = (float) Math.PI;
+
+                if (distance > mMaxPushDistance) {
+                    otherNode = otherNode.mNext;
+                    continue;
+                }
+
+                final float angle = angle(otherNode);
 
                 final float force;
                 if (otherNode == mNext || otherNode.mNext == this) {
 
-                    force = mFavouriteNeighbourDistance - distance;
-                    Log.d("Line.Node.update()", this.toString() + " is neighbour of " + otherNode.toString() + ".");
+                    if (distance > mPreferredNeighbourDistance) {
+                        force = mPreferredNeighbourDistance * 0.5f;
+                    } else {
+                        force = -mNodeRadius * 0.5f;
+                    }
 
-                    mX += (float) Math.cos(angle) * force;
-                    mY += (float) Math.sin(angle) * force;
+//                    Log.d("Line.Node.update()", this.toString() + " is neighbour of " + otherNode.toString() + ". Preferred distance: " + mPreferredNeighbourDistance);
 
-                    Log.d("Line.Node.update()", "Distance: " + distance + "; Force: " + force + "; Angle: " + angle + " --> " + mX + ", " + mY);
 
-                } else if (distance > mMaxPushDistance) {
-//                        Log.d("Line.update()", this.toString() + " is too far away from " + otherNode.toString() + ".");
-                    force = 0f;
+//                    Log.d("Line.Node.update()", "Distance: " + distance + "; Force: " + force + "; Angle: " + angle + " --> " + mX + ", " + mY);
                 } else {
-                    force = 0f;
+
+                    if (distance < mNodeRadius) {
+                        force = 0f;
+                    } else {
+                        force = 0f;
+                    }
+//                    force = -mNodeRadius * 0.5f;
                 }
+
+                mX += (float) Math.cos(angle) * force;
+                mY += (float) Math.sin(angle) * force;
 
                 otherNode = otherNode.mNext;
             } while (true);

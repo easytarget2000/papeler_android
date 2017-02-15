@@ -21,7 +21,7 @@ public class WallpapelerService extends WallpaperService {
 
     private static final String TAG = WallpapelerService.class.getSimpleName();
 
-    private static final boolean CLEAR_FRAME = false;
+    private static final boolean CLEAR_FRAME = true;
 
     private static final int PAINT_1_ALPHA = CLEAR_FRAME ? 200 : 20;
 
