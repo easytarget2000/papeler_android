@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -49,13 +48,12 @@ public class WallpapelerService extends WallpaperService {
         private final Runnable mUpdateRunnable = new Runnable() {
             @Override
             public void run() {
-                update();
                 draw();
             }
 
         };
 
-        private ArrayList<Line> mLines = new ArrayList<>();
+        private ArrayList<Line> mLines;
 
         private Paint mPaint1 = new Paint();
 
@@ -69,8 +67,6 @@ public class WallpapelerService extends WallpaperService {
 
         private float mSpread;
 
-        private float mSpreadHalf;
-
         private boolean mVisible = true;
 
         private boolean mIsTouching = false;
@@ -80,8 +76,6 @@ public class WallpapelerService extends WallpaperService {
         private boolean mDrawing = false;
 
         private long mFirstTouchMillis;
-
-        private int mMaxNumber;
 
         private Bitmap mBitmap;
 
@@ -133,16 +127,15 @@ public class WallpapelerService extends WallpaperService {
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
+            mLines = new ArrayList<>();
+
             mWidth = width;
             mSpread = mWidth * 0.4f;
-            mSpreadHalf = mSpread * 0.5f;
             mHeight = height;
 
             mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
             mCanvas.drawColor(Color.BLACK);
-
-            mDebugDrawCounter = 0;
 
             if (VERBOSE) {
                 Log.d(TAG, "New Surface: " + format + ": " + mWidth + " x " + mHeight);
@@ -190,7 +183,7 @@ public class WallpapelerService extends WallpaperService {
             if (mLines.size() > 10) {
                 return;
             }
-            
+
             final float canvasSize = Math.min(mWidth, mHeight);
             mLines.add(new Line(x, y, canvasSize));
         }
@@ -215,11 +208,16 @@ public class WallpapelerService extends WallpaperService {
                 canvas = holder.lockCanvas();
                 if (canvas != null) {
 
-                    for (final Line line : mLines) {
+                    for (int i = 0; i < mLines.size() - 1; i++) {
+                        final Line line = mLines.get(i);
                         final boolean lineMoved = line.update(mIsTouching);
                         hadAnyMovement |= lineMoved;
 
                         line.draw(mCanvas, mPaint1, mPaint2);
+                        
+                        if (!hadAnyMovement) {
+                            mLines.remove(i);
+                        }
                     }
                     canvas.drawBitmap(mBitmap, 0f, 0f, null);
 
@@ -237,8 +235,6 @@ public class WallpapelerService extends WallpaperService {
             if (VERBOSE) {
                 Log.d(TAG, "Pengine.draw() took " + (System.currentTimeMillis() - startMillis) + "ms.");
             }
-
-            Log.d(TAG, "Pengine.draw().movement: " + hadAnyMovement);
 
             if (hadAnyMovement) {
                 scheduleDrawIfReady();
@@ -258,68 +254,5 @@ public class WallpapelerService extends WallpaperService {
             }
         }
 
-        private void update() {
-
-        }
-
-        private float getAgeFactor() {
-
-            if (mIsTouching) {
-                return 1f;
-            }
-
-            final long ageMillis =  System.currentTimeMillis() - mLastTouchMillis;
-
-            if (ageMillis >= MAX_TOUCH_AGE_MILLIS) {
-                if (VERBOSE) {
-                    Log.d(TAG, "Pengine.getAgeFactor() -> 0");
-                }
-                return 0f;
-            } else {
-                if (VERBOSE) {
-                    Log.d(TAG, "Pengine.getAgeFactor() -> " + (1f - (ageMillis / MAX_TOUCH_AGE_FLOATIES)));
-                }
-                return 1f - (ageMillis / MAX_TOUCH_AGE_FLOATIES);
-            }
-        }
-
-        private void drawDrop(@NonNull Canvas canvas, @NonNull final Drop drop) {
-
-//            Log.d(TAG, "drawDrop " + mDrop.x + ", " + mDrop.y);
-
-//            final float spread = (float) Math.random() * mWidth * 0.1f;
-
-//            final int brightness = (int) (50 * getAgeFactor());
-//            mPaint1.setAlpha(brightness);
-//
-//            double angle;
-//            float radius;
-//            for (int i = 0; i < DENSITY; i++) {
-//                angle =  Math.random() * Math.PI * 2;
-//                radius = mSpread * (float) Math.random() + 0.2f;
-//                canvas.drawPoint(
-//                        mDrop.x + (float) Math.cos(angle) * radius,
-//                        mDrop.y + (float) Math.sin(angle) * radius,
-//                        mPaint1
-//                );
-//            }
-        }
-
-        // Surface view requires that all elements are drawn completely
-//        private void drawCircles(Canvas canvas) {
-////            canvas.drawColor(Color.BLACK);
-//            if (mPoints.size() > 100) {
-//                mPoints.clear();
-//            }
-//
-//            for (final Drop point : mPoints) {
-//                canvas.drawCircle(
-//                        point.x,
-//                        point.y,
-//                        (float) Math.random() * mWidth * 0.1f,
-//                        mPaint1
-//                );
-//            }
-//        }
     }
 }

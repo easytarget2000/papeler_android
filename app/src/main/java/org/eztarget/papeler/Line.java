@@ -3,6 +3,7 @@ package org.eztarget.papeler;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import java.util.Random;
 
@@ -48,7 +49,9 @@ public class Line {
         final float initialRadius = random(mCanvasSize * 0.01f) + mCanvasSize * 0.05f;
 //        final float initialAngle = random((float) Math.PI * 2);
         mJitter = mCanvasSize * 0.001f;
-        mNodeDensity = 30 + mRandom.nextInt(30);
+        mNodeDensity = 10 + mRandom.nextInt(30);
+
+        Log.d("Line()", "Node density: " + mNodeDensity);
 
         Node lastNode = null;
         for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
@@ -111,7 +114,7 @@ public class Line {
 
         } while (currentNode != mFirstNode);
 
-        return mAge < 150;
+        return mAge < 100;
     }
 
     private void addNodeNextTo(final Node node) {
