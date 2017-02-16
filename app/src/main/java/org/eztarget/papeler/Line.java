@@ -29,13 +29,19 @@ public class Line {
 
     private float mNodeRadius;
 
+    private float mNeighbourGravity;
+
     private float mPreferredNeighbourDistance;
+
+    private float mPreferredNeighbourDistanceHalf;
 
     private float mMaxPushDistance;
 
     private float mJitter;
 
     private int mInsertionIndex = NUM_OF_INITIAL_NODES / 2;
+
+    private boolean mStopped = true;
 
     private Random mRandom = new Random();
 
@@ -44,6 +50,7 @@ public class Line {
         mCanvasSize = canvasSize;
         mNodeSize = 4f;
         mNodeRadius = mNodeSize * 0.5f;
+        mNeighbourGravity = mNodeRadius * 0.5f;
         mMaxPushDistance = canvasSize * 0.1f;
 
         final float initialRadius = random(mCanvasSize * 0.01f) + mCanvasSize * 0.05f;
@@ -71,6 +78,7 @@ public class Line {
                 lastNode = node;
             } else if (i == NUM_OF_INITIAL_NODES - 1) {
                 mPreferredNeighbourDistance = node.distance(lastNode);
+                mPreferredNeighbourDistanceHalf = mPreferredNeighbourDistance * 0.5f;
                 lastNode.mNext = node;
                 node.mNext = mFirstNode;
             } else {
@@ -92,15 +100,18 @@ public class Line {
             final Node nextNode = currentNode.mNext;
 
             canvas.drawLine(currentNode.mX, currentNode.mY, nextNode.mX, nextNode.mY, paint1);
-            canvas.drawCircle(currentNode.mX, currentNode.mY, mNodeRadius, paint2);
+
+            canvas.drawPoint(currentNode.mX, currentNode.mY, paint2);
+            canvas.drawPoint(currentNode.mX + 1, currentNode.mY + 1, paint2);
 
             currentNode = nextNode;
-        } while (currentNode != mFirstNode);
+        } while (!mStopped && currentNode != mFirstNode);
     }
 
     boolean update(final boolean isTouching) {
 
         ++mAge;
+        mStopped = false;
 
         int nodeCounter = 0;
         Node currentNode = mFirstNode;
@@ -112,9 +123,13 @@ public class Line {
                 addNodeNextTo(currentNode);
             }
 
-        } while (currentNode != mFirstNode);
+        } while (!mStopped && currentNode != mFirstNode);
 
-        return mAge < 100;
+        return mAge < 60;
+    }
+
+    void stopPerforming() {
+        mStopped = true;
     }
 
     private void addNodeNextTo(final Node node) {
@@ -202,24 +217,23 @@ public class Line {
                 final float angle = angle(otherNode);
 
                 final float force;
-                if (otherNode == mNext || otherNode.mNext == this) {
+                if (otherNode == mNext) {
 
                     if (distance > mPreferredNeighbourDistance) {
-                        force = mPreferredNeighbourDistance * 0.5f;
+                        force = mPreferredNeighbourDistanceHalf;
                     } else {
-                        force = -mNodeRadius * 0.5f;
+                        force = -mNeighbourGravity;
                     }
 
 //                    Log.d("Line.Node.update()", this.toString() + " is neighbour of " + otherNode.toString() + ". Preferred distance: " + mPreferredNeighbourDistance);
-
-
 //                    Log.d("Line.Node.update()", "Distance: " + distance + "; Force: " + force + "; Angle: " + angle + " --> " + mX + ", " + mY);
+
                 } else {
 
                     if (distance < mNodeRadius) {
                         force = -mNodeRadius;
                     } else {
-                        force = -10f / distance;
+                        force = -16f / distance;
                     }
 //                    force = -mNodeRadius * 0.5f;
                 }
@@ -228,7 +242,7 @@ public class Line {
                 mY += (float) Math.sin(angle) * force;
 
                 otherNode = otherNode.mNext;
-            } while (true);
+            } while (!mStopped);
         }
 
     }

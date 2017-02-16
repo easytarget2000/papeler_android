@@ -53,7 +53,7 @@ public class WallpapelerService extends WallpaperService {
 
         };
 
-        private ArrayList<Line> mLines;
+        private ArrayList<Line> mLines = new ArrayList<>();
 
         private Paint mPaint1 = new Paint();
 
@@ -111,7 +111,7 @@ public class WallpapelerService extends WallpaperService {
                 Log.d(TAG, "Pengine.onVisibilityChanged(" + mVisible + ")");
             }
 
-            scheduleDraw();
+            nextStep();
         }
 
         @Override
@@ -121,15 +121,12 @@ public class WallpapelerService extends WallpaperService {
             Log.d(TAG, "Pengine.onSurfaceDestroyed(" + mVisible + ")");
 
             mVisible = false;
-            mHandler.removeCallbacks(mUpdateRunnable);
+            stopAllLinePerformances();
+            cancelDrawSchedule();
         }
-
-        private int mDebugDrawCounter;
 
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-            mLines = new ArrayList<>();
 
             mWidth = width;
             mSpread = mWidth * 0.4f;
@@ -139,8 +136,14 @@ public class WallpapelerService extends WallpaperService {
             mCanvas = new Canvas(mBitmap);
             mCanvas.drawColor(Color.BLACK);
 
-            mResetCanvasOnce = true;
-            scheduleDraw();
+            if (mLines != null) {
+                stopAllLinePerformances();
+                mLines = new ArrayList<>();
+
+                // Draw once to clear everything.
+                mResetCanvasOnce = true;
+                nextStep();
+            }
 
             if (VERBOSE) {
                 Log.d(TAG, "New Surface: " + format + ": " + mWidth + " x " + mHeight);
@@ -174,7 +177,7 @@ public class WallpapelerService extends WallpaperService {
                 mLastTouchMillis = System.currentTimeMillis();
 
                 mResetCanvasOnce = false;
-                scheduleDraw();
+                nextStep();
 
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
                 mIsTouching = false;
@@ -199,6 +202,7 @@ public class WallpapelerService extends WallpaperService {
                 return;
             }
 
+            cancelDrawSchedule();
             mDrawing = true;
 
             final long startMillis = System.currentTimeMillis();
@@ -214,7 +218,15 @@ public class WallpapelerService extends WallpaperService {
                 canvas = holder.lockCanvas();
                 if (canvas != null) {
 
-                    for (int i = 0; i < mLines.size() - 1; i++) {
+                    for (int i = 0; i < mLines.size(); i++) {
+
+                        if (mResetCanvasOnce) {
+                            mResetCanvasOnce = false;
+                            canvas.drawColor(Color.BLACK);
+                            mCanvas.drawColor(Color.BLACK);
+                            break;
+                        }
+
                         final Line line = mLines.get(i);
                         final boolean lineMoved = line.update(mIsTouching);
                         hadAnyMovement |= lineMoved;
@@ -225,12 +237,7 @@ public class WallpapelerService extends WallpaperService {
                             mLines.remove(i);
                         }
 
-                        if (mResetCanvasOnce) {
-                            mResetCanvasOnce = false;
-                            canvas.drawColor(Color.BLACK);
-                            mCanvas.drawColor(Color.BLACK);
-                            break;
-                        }
+
                     }
                     canvas.drawBitmap(mBitmap, 0f, 0f, null);
 
@@ -254,20 +261,32 @@ public class WallpapelerService extends WallpaperService {
             }
 
             if (hadAnyMovement) {
-                scheduleDraw();
+                nextStep();
             }
         }
 
-        private void scheduleDraw() {
+        private void nextStep() {
 
             if (VERBOSE) {
-                Log.d(TAG, "Pengine.scheduleDraw()");
+                Log.d(TAG, "Pengine.nextStep()");
             }
 
-            mHandler.removeCallbacks(mUpdateRunnable);
+            cancelDrawSchedule();
 
             if (mVisible) {
                 mHandler.postDelayed(mUpdateRunnable, 20L);
+            } else if (mLines != null){
+                stopAllLinePerformances();
+            }
+        }
+
+        private void cancelDrawSchedule() {
+            mHandler.removeCallbacks(mUpdateRunnable);
+        }
+
+        private void stopAllLinePerformances() {
+            for (final Line line : mLines) {
+                line.stopPerforming();
             }
         }
 
