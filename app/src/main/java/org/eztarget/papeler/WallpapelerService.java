@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -23,9 +24,9 @@ public class WallpapelerService extends WallpaperService {
 
     private static final boolean CLEAR_FRAME = false;
 
-    private static final int PAINT_1_ALPHA = CLEAR_FRAME ? 200 : 20;
+    private static final int PAINT_1_ALPHA = CLEAR_FRAME ? 200 : 40;
 
-    private static final int PAINT_2_ALPHA = CLEAR_FRAME ? 180 : 10;
+    private static final int PAINT_2_ALPHA = CLEAR_FRAME ? 180 : 20;
 
     private static final long MAX_TOUCH_AGE_MILLIS = 3L * 1000L;
 
@@ -33,7 +34,7 @@ public class WallpapelerService extends WallpaperService {
 
     private static final int DENSITY = 10;
 
-    private static final boolean VERBOSE = true;
+    private static final boolean VERBOSE = false;
 
     @Override
     public Engine onCreateEngine() {
@@ -54,7 +55,7 @@ public class WallpapelerService extends WallpaperService {
 
         };
 
-        private Line mLine;
+        private ArrayList<Line> mLines = new ArrayList<>();
 
         private Paint mPaint1 = new Paint();
 
@@ -152,10 +153,12 @@ public class WallpapelerService extends WallpaperService {
 
         @Override
         public void onTouchEvent(MotionEvent event) {
+
+            Log.d(TAG, "onTouchEvent: " + event.getAction() + ": " + event.getDownTime());
+
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-                final float canvasSize = Math.min(mWidth, mHeight);
-                mLine = new Line(event.getX(), event.getY(), canvasSize);
+                addLine(event.getX(), event.getY());
 
                 final Random rnd = new Random();
                 mPaint2.setARGB(
@@ -182,6 +185,16 @@ public class WallpapelerService extends WallpaperService {
             super.onTouchEvent(event);
         }
 
+        private void addLine(final float x, final float y) {
+
+            if (mLines.size() > 10) {
+                return;
+            }
+            
+            final float canvasSize = Math.min(mWidth, mHeight);
+            mLines.add(new Line(x, y, canvasSize));
+        }
+
         private void draw() {
             if (mDrawing) {
                 return;
@@ -196,11 +209,18 @@ public class WallpapelerService extends WallpaperService {
 
             final SurfaceHolder holder = getSurfaceHolder();
             Canvas canvas = null;
+            boolean hadAnyMovement = false;
 
             try {
                 canvas = holder.lockCanvas();
                 if (canvas != null) {
-                    mLine.draw(mCanvas, mPaint1, mPaint2);
+
+                    for (final Line line : mLines) {
+                        final boolean lineMoved = line.update(mIsTouching);
+                        hadAnyMovement |= lineMoved;
+
+                        line.draw(mCanvas, mPaint1, mPaint2);
+                    }
                     canvas.drawBitmap(mBitmap, 0f, 0f, null);
 
                     if (CLEAR_FRAME) {
@@ -218,8 +238,9 @@ public class WallpapelerService extends WallpaperService {
                 Log.d(TAG, "Pengine.draw() took " + (System.currentTimeMillis() - startMillis) + "ms.");
             }
 
-            final boolean hadMovement = mLine.update(mIsTouching);
-            if (hadMovement) {
+            Log.d(TAG, "Pengine.draw().movement: " + hadAnyMovement);
+
+            if (hadAnyMovement) {
                 scheduleDrawIfReady();
             }
         }
@@ -232,7 +253,7 @@ public class WallpapelerService extends WallpaperService {
 
             mHandler.removeCallbacks(mUpdateRunnable);
 
-            if (mVisible && mLine != null) {
+            if (mVisible) {
                 mHandler.postDelayed(mUpdateRunnable, 20L);
             }
         }

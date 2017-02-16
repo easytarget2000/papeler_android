@@ -24,6 +24,8 @@ public class Line {
 
     private float mNodeSize;
 
+    private float mNodeDensity;
+
     private float mNodeRadius;
 
     private float mPreferredNeighbourDistance;
@@ -43,9 +45,10 @@ public class Line {
         mNodeRadius = mNodeSize * 0.5f;
         mMaxPushDistance = canvasSize * 0.1f;
 
-        final float initialRadius = random(mCanvasSize * 0.05f) + mCanvasSize * 0.05f;
+        final float initialRadius = random(mCanvasSize * 0.01f) + mCanvasSize * 0.05f;
 //        final float initialAngle = random((float) Math.PI * 2);
         mJitter = mCanvasSize * 0.001f;
+        mNodeDensity = 30 + mRandom.nextInt(30);
 
         Node lastNode = null;
         for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
@@ -63,15 +66,12 @@ public class Line {
             if (mFirstNode == null) {
                 mFirstNode = node;
                 lastNode = node;
-//                Log.d("Line()", "First node.");
             } else if (i == NUM_OF_INITIAL_NODES - 1) {
                 mPreferredNeighbourDistance = node.distance(lastNode);
                 lastNode.mNext = node;
                 node.mNext = mFirstNode;
-//                Log.d("Line()", "Connected last node to " + node.mNext + ".");
             } else {
                 lastNode.mNext = node;
-//                Log.d("Line()", "Connected node " + lastNode + " to " + lastNode.mNext + ".");
                 lastNode = node;
             }
 
@@ -89,7 +89,7 @@ public class Line {
             final Node nextNode = currentNode.mNext;
 
             canvas.drawLine(currentNode.mX, currentNode.mY, nextNode.mX, nextNode.mY, paint1);
-//            canvas.drawCircle(currentNode.mX, currentNode.mY, mNodeRadius, paint2);
+            canvas.drawCircle(currentNode.mX, currentNode.mY, mNodeRadius, paint2);
 
             currentNode = nextNode;
         } while (currentNode != mFirstNode);
@@ -105,37 +105,13 @@ public class Line {
             currentNode.update(!isTouching);
             currentNode = currentNode.mNext;
 
-            if (++nodeCounter % 20 == 0) {
+            if (++nodeCounter % mNodeDensity == 0) {
                 addNodeNextTo(currentNode);
             }
 
         } while (currentNode != mFirstNode);
 
-//        if (!isTouching && mAge % 2 == 0) {
-//            final Node node1 = mNodes.get(mInsertionIndex);
-//            final Node node2 = mNodes.get(node1.mNeighbour2Id);
-//
-//            final Node newMiddleNode = new Node();
-//
-//            newMiddleNode.mId = mNodes.size();
-//            newMiddleNode.mNeighbor1Id = node1.mId;
-//            newMiddleNode.mNeighbour2Id = node2.mId;
-//
-//            node1.mNeighbour2Id = newMiddleNode.mId;
-//            node2.mNeighbor1Id = newMiddleNode.mId;
-//
-//            newMiddleNode.mX = (node1.mX + node2.mX) / 2f;
-//            newMiddleNode.mY = (node1.mY + node2.mY) / 2f;
-//
-//            mNodes.add(node1.mId, node1);
-//            mNodes.add(node2.mId, node2);
-//            mNodes.add(newMiddleNode.mId, newMiddleNode);
-//
-//            mInsertionIndex = node1.mNeighbour2Id;
-//            Log.d("Line.update()", mInsertionIndex + " -> New: " + newMiddleNode + " between " + node1 + " and " + node2 + ".");
-//        }
-
-        return mAge < 200;
+        return mAge < 150;
     }
 
     private void addNodeNextTo(final Node node) {
@@ -240,7 +216,7 @@ public class Line {
                     if (distance < mNodeRadius) {
                         force = -mNodeRadius;
                     } else {
-                        force = -1f / distance;
+                        force = -10f / distance;
                     }
 //                    force = -mNodeRadius * 0.5f;
                 }
