@@ -77,6 +77,8 @@ public class WallpapelerService extends WallpaperService {
 
         private long mFirstTouchMillis;
 
+        private boolean mResetCanvasOnce = false;
+
         private Bitmap mBitmap;
 
         private Canvas mCanvas;
@@ -109,7 +111,7 @@ public class WallpapelerService extends WallpaperService {
                 Log.d(TAG, "Pengine.onVisibilityChanged(" + mVisible + ")");
             }
 
-            scheduleDrawIfReady();
+            scheduleDraw();
         }
 
         @Override
@@ -136,6 +138,9 @@ public class WallpapelerService extends WallpaperService {
             mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
             mCanvas.drawColor(Color.BLACK);
+
+            mResetCanvasOnce = true;
+            scheduleDraw();
 
             if (VERBOSE) {
                 Log.d(TAG, "New Surface: " + format + ": " + mWidth + " x " + mHeight);
@@ -168,7 +173,8 @@ public class WallpapelerService extends WallpaperService {
                 mIsTouching = true;
                 mLastTouchMillis = System.currentTimeMillis();
 
-                scheduleDrawIfReady();
+                mResetCanvasOnce = false;
+                scheduleDraw();
 
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
                 mIsTouching = false;
@@ -214,9 +220,16 @@ public class WallpapelerService extends WallpaperService {
                         hadAnyMovement |= lineMoved;
 
                         line.draw(mCanvas, mPaint1, mPaint2);
-                        
+
                         if (!hadAnyMovement) {
                             mLines.remove(i);
+                        }
+
+                        if (mResetCanvasOnce) {
+                            mResetCanvasOnce = false;
+                            canvas.drawColor(Color.BLACK);
+                            mCanvas.drawColor(Color.BLACK);
+                            break;
                         }
                     }
                     canvas.drawBitmap(mBitmap, 0f, 0f, null);
@@ -227,7 +240,11 @@ public class WallpapelerService extends WallpaperService {
                 }
             } finally {
                 if (canvas != null) {
-                    holder.unlockCanvasAndPost(canvas);
+                    try {
+                        holder.unlockCanvasAndPost(canvas);
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    }
                 }
                 mDrawing = false;
             }
@@ -237,14 +254,14 @@ public class WallpapelerService extends WallpaperService {
             }
 
             if (hadAnyMovement) {
-                scheduleDrawIfReady();
+                scheduleDraw();
             }
         }
 
-        private void scheduleDrawIfReady() {
+        private void scheduleDraw() {
 
             if (VERBOSE) {
-                Log.d(TAG, "Pengine.scheduleDrawIfReady()");
+                Log.d(TAG, "Pengine.scheduleDraw()");
             }
 
             mHandler.removeCallbacks(mUpdateRunnable);
