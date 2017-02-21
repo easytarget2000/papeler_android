@@ -11,17 +11,25 @@ import java.util.Random;
  * Created by michelsievers on 08/02/2017.
  */
 
-public class Line {
+public class Foliage {
 
     private static final int NUM_OF_INITIAL_NODES = 40;
 
     private static final float TWO_PI = (float) Math.PI * 2f;
+
+    private static final int MAX_AGE = 100;
+
+    private static final int ADD_NODE_LIMIT = 128;
+
+    private static final float PUSH_FORCE = 16f;
 
     private Node mFirstNode;
 
     private int mAge = 0;
 
     private float mCanvasSize;
+
+    private boolean mSymmetric;
 
     private float mNodeSize;
 
@@ -45,20 +53,76 @@ public class Line {
 
     private Random mRandom = new Random();
 
-    Line(final float x, final float y, final float canvasSize) {
-
+    private Foliage(final float canvasSize, final boolean symmetric) {
         mCanvasSize = canvasSize;
-        mNodeSize = 4f;
+        mNodeSize = canvasSize / 300f;
         mNodeRadius = mNodeSize * 0.5f;
         mNeighbourGravity = mNodeRadius * 0.5f;
         mMaxPushDistance = canvasSize * 0.1f;
-
-        final float initialRadius = random(mCanvasSize * 0.01f) + mCanvasSize * 0.05f;
-//        final float initialAngle = random((float) Math.PI * 2);
         mJitter = mCanvasSize * 0.001f;
+
+        mSymmetric = symmetric;
+    }
+
+    static Foliage lineInstance(
+            final float x,
+            final float y,
+            final boolean symmetric,
+            final float canvasSize
+    ) {
+        return new Foliage(canvasSize, symmetric).initLine(x, y);
+    }
+
+    static Foliage circleInstance(
+            final float x,
+            final float y,
+            final boolean symmetric,
+            final float canvasSize
+    ) {
+        return new Foliage(canvasSize, symmetric).initInCircleShape(x, y);
+    }
+
+    private Foliage initLine(final float x, final float y) {
+
+        final float lineLength = random(mCanvasSize * 0.3f);
+        final float lineSinHeight = lineLength / 3f;
+
         mNodeDensity = 10 + mRandom.nextInt(30);
 
-        Log.d("Line()", "Node density: " + mNodeDensity);
+        Log.d("Foliage()", "Line init. Node density: " + mNodeDensity);
+
+        Node lastNode = null;
+        for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
+            final Node node = new Node();
+
+
+            node.mX = x + (lineLength * ((i + 1f) / NUM_OF_INITIAL_NODES));
+
+            final float angleOfNode = 2f * TWO_PI * ((i + 1f) / NUM_OF_INITIAL_NODES);
+            node.mY = y + getJitterValue() + ((float) Math.sin(angleOfNode) * lineSinHeight);
+
+            if (mFirstNode == null) {
+                mFirstNode = node;
+                lastNode = node;
+            } else if (i == NUM_OF_INITIAL_NODES - 1) {
+                mPreferredNeighbourDistance = node.distance(lastNode);
+                mPreferredNeighbourDistanceHalf = mPreferredNeighbourDistance * 0.5f;
+                lastNode.mNext = node;
+//                node.mNext = mFirstNode;
+            } else {
+                lastNode.mNext = node;
+                lastNode = node;
+            }
+
+        }
+        return this;
+    }
+
+    private Foliage initInCircleShape(final float x, final float y) {
+        final float initialRadius = random(mCanvasSize * 0.01f) + mCanvasSize * 0.05f;
+        mNodeDensity = 10 + mRandom.nextInt(30);
+
+        Log.d("Foliage()", "Circle init. Node density: " + mNodeDensity);
 
         Node lastNode = null;
         for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
@@ -68,10 +132,10 @@ public class Line {
 
             node.mX = x
                     + ((float) Math.cos(angleOfNode) * initialRadius)
-                    + mJitter * 0.5f - random(mJitter);
+                    + getJitterValue();
             node.mY = y
                     + ((float) Math.sin(angleOfNode) * initialRadius)
-                    + mJitter * 0.5f - random(mJitter);
+                    + getJitterValue();
 
             if (mFirstNode == null) {
                 mFirstNode = node;
@@ -88,6 +152,7 @@ public class Line {
 
         }
 
+        return this;
     }
 
     void draw(
@@ -98,11 +163,23 @@ public class Line {
         Node currentNode = mFirstNode;
         do {
             final Node nextNode = currentNode.mNext;
+            if (nextNode == null) {
+                break;
+            }
 
-            canvas.drawLine(currentNode.mX, currentNode.mY, nextNode.mX, nextNode.mY, paint1);
+            if (mSymmetric) {
+                canvas.drawPoint(currentNode.mX, currentNode.mY, paint1);
+                canvas.drawPoint(currentNode.mX, currentNode.mY + 1, paint2);
+                canvas.drawPoint(currentNode.mX + 1, currentNode.mY + 1, paint2);
 
-            canvas.drawPoint(currentNode.mX, currentNode.mY, paint2);
-            canvas.drawPoint(currentNode.mX + 1, currentNode.mY + 1, paint2);
+                canvas.drawPoint(mCanvasSize - currentNode.mX, currentNode.mY, paint1);
+                canvas.drawPoint(mCanvasSize - currentNode.mX, currentNode.mY + 1, paint1);
+                canvas.drawPoint(mCanvasSize - currentNode.mX + 1, currentNode.mY + 1, paint2);
+            } else {
+                canvas.drawLine(currentNode.mX, currentNode.mY, nextNode.mX, nextNode.mY, paint1);
+                canvas.drawPoint(currentNode.mX, currentNode.mY, paint2);
+                canvas.drawPoint(currentNode.mX + 1, currentNode.mY + 1, paint2);
+            }
 
             currentNode = nextNode;
         } while (!mStopped && currentNode != mFirstNode);
@@ -116,16 +193,20 @@ public class Line {
         int nodeCounter = 0;
         Node currentNode = mFirstNode;
         do {
-            currentNode.update(!isTouching);
-            currentNode = currentNode.mNext;
+            if (currentNode == null) {
+                break;
+            }
 
-            if (++nodeCounter % mNodeDensity == 0) {
+            currentNode.update(!isTouching);
+
+            if (nodeCounter < ADD_NODE_LIMIT && (++nodeCounter % mNodeDensity == 0)) {
                 addNodeNextTo(currentNode);
             }
 
+            currentNode = currentNode.mNext;
         } while (!mStopped && currentNode != mFirstNode);
 
-        return mAge < 60;
+        return mAge < MAX_AGE;
     }
 
     void stopPerforming() {
@@ -134,6 +215,10 @@ public class Line {
 
     private void addNodeNextTo(final Node node) {
         final Node oldNeighbour = node.mNext;
+        if (oldNeighbour == null) {
+            return;
+        }
+
         final Node newNeighbour = new Node();
 
         newNeighbour.mX = (node.mX + oldNeighbour.mX) * 0.5f;
@@ -141,6 +226,10 @@ public class Line {
 
         node.mNext = newNeighbour;
         newNeighbour.mNext = oldNeighbour;
+    }
+
+    private float getJitterValue() {
+        return mJitter * 0.5f - random(mJitter);
     }
 
     private static float random(final float maxValue) {
@@ -192,8 +281,8 @@ public class Line {
 
         private void update(final boolean applyForces) {
 
-            mX += mJitter * 0.5f - random(mJitter);
-            mY += mJitter * 0.5f - random(mJitter);
+            mX += getJitterValue();
+            mY += getJitterValue();
 
             if (!applyForces) {
                 return;
@@ -203,7 +292,7 @@ public class Line {
 
             do {
 
-                if (otherNode.mNext == this) {
+                if (otherNode == null || otherNode.mNext == this) {
                     return;
                 }
 
@@ -225,15 +314,15 @@ public class Line {
                         force = -mNeighbourGravity;
                     }
 
-//                    Log.d("Line.Node.update()", this.toString() + " is neighbour of " + otherNode.toString() + ". Preferred distance: " + mPreferredNeighbourDistance);
-//                    Log.d("Line.Node.update()", "Distance: " + distance + "; Force: " + force + "; Angle: " + angle + " --> " + mX + ", " + mY);
+//                    Log.d("Foliage.Node.update()", this.toString() + " is neighbour of " + otherNode.toString() + ". Preferred distance: " + mPreferredNeighbourDistance);
+//                    Log.d("Foliage.Node.update()", "Distance: " + distance + "; Force: " + force + "; Angle: " + angle + " --> " + mX + ", " + mY);
 
                 } else {
 
                     if (distance < mNodeRadius) {
                         force = -mNodeRadius;
                     } else {
-                        force = -16f / distance;
+                        force = -PUSH_FORCE / distance;
                     }
 //                    force = -mNodeRadius * 0.5f;
                 }

@@ -23,9 +23,9 @@ public class WallpapelerService extends WallpaperService {
 
     private static final boolean CLEAR_FRAME = false;
 
-    private static final int PAINT_1_ALPHA = CLEAR_FRAME ? 200 : 40;
+    private static final int PAINT_1_ALPHA = CLEAR_FRAME ? 200 : 36;
 
-    private static final int PAINT_2_ALPHA = CLEAR_FRAME ? 180 : 20;
+    private static final int PAINT_2_ALPHA = CLEAR_FRAME ? 180 : 36;
 
     private static final long MAX_TOUCH_AGE_MILLIS = 3L * 1000L;
 
@@ -53,7 +53,7 @@ public class WallpapelerService extends WallpaperService {
 
         };
 
-        private ArrayList<Line> mLines = new ArrayList<>();
+        private ArrayList<Foliage> mFoliages = new ArrayList<>();
 
         private Paint mPaint1 = new Paint();
 
@@ -65,13 +65,13 @@ public class WallpapelerService extends WallpaperService {
 
         private int mHeight;
 
-        private float mSpread;
-
         private boolean mVisible = true;
 
         private boolean mIsTouching = false;
 
         private long mLastTouchMillis;
+
+        private boolean mSymmetric;
 
         private boolean mDrawing = false;
 
@@ -129,16 +129,17 @@ public class WallpapelerService extends WallpaperService {
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
             mWidth = width;
-            mSpread = mWidth * 0.4f;
             mHeight = height;
 
             mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
             mCanvas.drawColor(Color.BLACK);
 
-            if (mLines != null) {
+            mSymmetric = new Random().nextBoolean();
+
+            if (mFoliages != null) {
                 stopAllLinePerformances();
-                mLines = new ArrayList<>();
+                mFoliages = new ArrayList<>();
 
                 // Draw once to clear everything.
                 mResetCanvasOnce = true;
@@ -159,7 +160,7 @@ public class WallpapelerService extends WallpaperService {
 
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-                addLine(event.getX(), event.getY());
+                addFoliage(event.getX(), event.getY());
 
                 final Random rnd = new Random();
                 mPaint2.setARGB(
@@ -187,14 +188,25 @@ public class WallpapelerService extends WallpaperService {
             super.onTouchEvent(event);
         }
 
-        private void addLine(final float x, final float y) {
+        private void addFoliage(final float x, final float y) {
 
-            if (mLines.size() > 10) {
+            if (mFoliages.size() > 10) {
                 return;
             }
 
             final float canvasSize = Math.min(mWidth, mHeight);
-            mLines.add(new Line(x, y, canvasSize));
+
+            final Foliage foliage;
+//            switch (0) {
+            switch ((int) (Math.random() * 2)) {
+                case 0:
+                    foliage = Foliage.circleInstance(x, y, mSymmetric, canvasSize);
+                    break;
+                default:
+                    foliage = Foliage.lineInstance(x, y, mSymmetric, canvasSize);
+            }
+
+            mFoliages.add(foliage);
         }
 
         private void draw() {
@@ -218,7 +230,7 @@ public class WallpapelerService extends WallpaperService {
                 canvas = holder.lockCanvas();
                 if (canvas != null) {
 
-                    for (int i = 0; i < mLines.size(); i++) {
+                    for (int i = 0; i < mFoliages.size(); i++) {
 
                         if (mResetCanvasOnce) {
                             mResetCanvasOnce = false;
@@ -227,16 +239,16 @@ public class WallpapelerService extends WallpaperService {
                             break;
                         }
 
-                        final Line line = mLines.get(i);
-                        final boolean lineMoved = line.update(mIsTouching);
+                        final Foliage foliage = mFoliages.get(i);
+                        final boolean lineMoved = foliage.update(mIsTouching);
                         hadAnyMovement |= lineMoved;
 
-                        line.draw(mCanvas, mPaint1, mPaint2);
+                        foliage.draw(mCanvas, mPaint1, mPaint2);
 
-                        if (!hadAnyMovement) {
-                            mLines.remove(i);
+                        if (!lineMoved) {
+                            mFoliages.remove(i);
+                            Log.d(TAG, "Pengine.draw() removing Foliage " + i + ".");
                         }
-
 
                     }
                     canvas.drawBitmap(mBitmap, 0f, 0f, null);
@@ -262,6 +274,8 @@ public class WallpapelerService extends WallpaperService {
 
             if (hadAnyMovement) {
                 nextStep();
+            } else {
+                Log.d(TAG, "Pengine.draw() not calling nextStep().");
             }
         }
 
@@ -275,7 +289,7 @@ public class WallpapelerService extends WallpaperService {
 
             if (mVisible) {
                 mHandler.postDelayed(mUpdateRunnable, 20L);
-            } else if (mLines != null){
+            } else if (mFoliages != null){
                 stopAllLinePerformances();
             }
         }
@@ -285,8 +299,8 @@ public class WallpapelerService extends WallpaperService {
         }
 
         private void stopAllLinePerformances() {
-            for (final Line line : mLines) {
-                line.stopPerforming();
+            for (final Foliage foliage : mFoliages) {
+                foliage.stopPerforming();
             }
         }
 
