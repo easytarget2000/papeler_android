@@ -61,6 +61,8 @@ public class WallpapelerService extends WallpaperService {
 
         private Paint mBitmapPaint = new Paint();
 
+        private int mBackgroundColor = Color.BLACK;
+
         private int mWidth;
 
         private int mHeight;
@@ -131,9 +133,12 @@ public class WallpapelerService extends WallpaperService {
             mWidth = width;
             mHeight = height;
 
+//            mWidth = Math.max(width, height);
+//            mHeight = mWidth;
+
             mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
-            mCanvas.drawColor(Color.BLACK);
+            mCanvas.drawColor(mBackgroundColor);
 
             mSymmetric = new Random().nextBoolean();
 
@@ -156,7 +161,7 @@ public class WallpapelerService extends WallpaperService {
         @Override
         public void onTouchEvent(MotionEvent event) {
 
-            Log.d(TAG, "onTouchEvent: " + event.getAction() + ": " + event.getDownTime());
+//            Log.d(TAG, "onTouchEvent: " + event.getAction() + ": " + event.getDownTime());
 
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
@@ -175,6 +180,9 @@ public class WallpapelerService extends WallpaperService {
                 }
 
                 mIsTouching = true;
+                mPaint1.setAlpha(PAINT_1_ALPHA);
+                mPaint2.setAlpha(PAINT_2_ALPHA);
+
                 mLastTouchMillis = System.currentTimeMillis();
 
                 mResetCanvasOnce = false;
@@ -234,8 +242,8 @@ public class WallpapelerService extends WallpaperService {
 
                         if (mResetCanvasOnce) {
                             mResetCanvasOnce = false;
-                            canvas.drawColor(Color.BLACK);
-                            mCanvas.drawColor(Color.BLACK);
+                            canvas.drawColor(mBackgroundColor);
+                            mCanvas.drawColor(mBackgroundColor);
                             break;
                         }
 
@@ -243,7 +251,9 @@ public class WallpapelerService extends WallpaperService {
                         final boolean lineMoved = foliage.update(mIsTouching);
                         hadAnyMovement |= lineMoved;
 
-                        foliage.draw(mCanvas, mPaint1, mPaint2);
+                        if (!mIsTouching) {
+                            foliage.draw(mCanvas, mPaint1, mPaint2);
+                        }
 
                         if (!lineMoved) {
                             mFoliages.remove(i);
