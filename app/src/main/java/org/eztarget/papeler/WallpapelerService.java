@@ -25,7 +25,7 @@ public class WallpapelerService extends WallpaperService {
 
     private static final int PAINT_1_ALPHA = CLEAR_FRAME ? 200 : 36;
 
-    private static final int PAINT_2_ALPHA = CLEAR_FRAME ? 180 : 36;
+    private static final int PAINT_2_ALPHA = CLEAR_FRAME ? 180 : 16;
 
     private static final long MAX_TOUCH_AGE_MILLIS = 3L * 1000L;
 

@@ -17,7 +17,7 @@ public class Foliage {
 
     private static final float TWO_PI = (float) Math.PI * 2f;
 
-    private static final int MAX_AGE = 100;
+    private static final int MAX_AGE = 78;
 
     private static final int ADD_NODE_LIMIT = 128;
 
@@ -30,6 +30,8 @@ public class Foliage {
     private float mCanvasSize;
 
     private boolean mSymmetric;
+
+    private int mShape;
 
     private float mNodeSize;
 
@@ -176,10 +178,28 @@ public class Foliage {
                 canvas.drawPoint(mCanvasSize - currentNode.mX, currentNode.mY + 1, paint1);
                 canvas.drawPoint(mCanvasSize - currentNode.mX + 1, currentNode.mY + 1, paint2);
             } else {
-                canvas.drawLine(currentNode.mX, currentNode.mY, nextNode.mX, nextNode.mY, paint1);
-                canvas.drawPoint(currentNode.mX, currentNode.mY, paint2);
-                canvas.drawPoint(currentNode.mX + 1, currentNode.mY + 1, paint2);
+
+//                if (mShape == 0) {
+                    canvas.drawLine(
+                            currentNode.mX,
+                            currentNode.mY,
+                            nextNode.mX,
+                            nextNode.mY,
+                            paint1
+                    );
+//                } else {
+                    canvas.drawRect(
+                            currentNode.mX,
+                            currentNode.mY,
+                            nextNode.mX,
+                            nextNode.mY,
+                            paint2
+                    );
+//                }
+//                canvas.drawPoint(currentNode.mX, currentNode.mY, paint2);
+//                canvas.drawPoint(currentNode.mX + 1, currentNode.mY + 1, paint2);
             }
+
 
             currentNode = nextNode;
         } while (!mStopped && currentNode != mFirstNode);
