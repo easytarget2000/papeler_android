@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">papeler</string>
+
+    <string name="app_name" translatable="false">Waypr</string>
+
+    <string name="main_welcome_msg">Touch the screen to place a drop.</string>
+
 </resources>

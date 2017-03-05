@@ -2,6 +2,7 @@ package org.eztarget.papeler;
 
 import android.app.Activity;
 import android.app.WallpaperManager;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
@@ -39,14 +40,25 @@ public class SetWallpaperActivity extends Activity {
 
     private void setWallpaper() {
 
-        final Intent setLivePapelerIntent;
-        setLivePapelerIntent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
-        setLivePapelerIntent.putExtra(
+        final Intent previewWallpaperIntent;
+        previewWallpaperIntent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+        previewWallpaperIntent.putExtra(
                 WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                new ComponentName(this, WallpapelerService.class)
+                new ComponentName(this, WayprService.class)
         );
 
-        startActivity(setLivePapelerIntent);
+        try {
+
+            startActivity(previewWallpaperIntent);
+
+        } catch (ActivityNotFoundException e) {
+
+            final Intent selectWallpaperIntent = new Intent();
+            selectWallpaperIntent.setAction(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER);
+            startActivity(selectWallpaperIntent);
+
+        }
+
         mDidSetWallpaper = true;
     }
 

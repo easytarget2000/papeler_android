@@ -5,33 +5,31 @@ import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import java.util.Random;
+class Foliage extends Being {
 
-/**
- * Created by michelsievers on 08/02/2017.
- */
+    private static final String TAG = Foliage.class.getSimpleName();
 
-public class Foliage {
-
-    private static final int NUM_OF_INITIAL_NODES = 40;
+    private static final int NUM_OF_INITIAL_NODES = 48;
 
     private static final float TWO_PI = (float) Math.PI * 2f;
 
-    private static final int MAX_AGE = 78;
+    private static final int MAX_AGE = 64;
 
-    private static final int ADD_NODE_LIMIT = 128;
+    private static final int ADD_NODE_LIMIT = 96;
 
     private static final float PUSH_FORCE = 16f;
 
     private Node mFirstNode;
 
-    private int mAge = 0;
-
     private float mCanvasSize;
 
     private boolean mSymmetric;
 
-    private int mShape;
+    private static final int RECT_MODE_NONE = 0;
+
+    private static final int RECT_MODE_STROKE = 1;
+
+    private int mRectMode;
 
     private float mNodeSize;
 
@@ -47,14 +45,6 @@ public class Foliage {
 
     private float mMaxPushDistance;
 
-    private float mJitter;
-
-    private int mInsertionIndex = NUM_OF_INITIAL_NODES / 2;
-
-    private boolean mStopped = true;
-
-    private Random mRandom = new Random();
-
     private Foliage(final float canvasSize, final boolean symmetric) {
         mCanvasSize = canvasSize;
         mNodeSize = canvasSize / 300f;
@@ -64,6 +54,13 @@ public class Foliage {
         mJitter = mCanvasSize * 0.001f;
 
         mSymmetric = symmetric;
+        if (mSymmetric) {
+            mRectMode = RECT_MODE_NONE;
+        } else {
+            mRectMode = mRandom.nextInt(3);
+        }
+
+        Log.d(TAG, "Initialized: node size: " + mNodeSize + ", rect mode: " + mRectMode);
     }
 
     static Foliage lineInstance(
@@ -86,8 +83,8 @@ public class Foliage {
 
     private Foliage initLine(final float x, final float y) {
 
-        final float lineLength = random(mCanvasSize * 0.3f);
-        final float lineSinHeight = lineLength / 3f;
+        final float lineLength = random(mCanvasSize * 0.5f);
+        final float lineSinHeight = lineLength / 6f;
 
         mNodeDensity = 10 + mRandom.nextInt(30);
 
@@ -96,7 +93,6 @@ public class Foliage {
         Node lastNode = null;
         for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
             final Node node = new Node();
-
 
             node.mX = x + (lineLength * ((i + 1f) / NUM_OF_INITIAL_NODES));
 
@@ -157,14 +153,13 @@ public class Foliage {
         return this;
     }
 
-    void draw(
-            @NonNull final Canvas canvas,
-            @NonNull final Paint paint1,
-            @NonNull final Paint paint2
-    ) {
+    @Override
+    public void draw(@NonNull Canvas canvas, @NonNull Paint paint1, @NonNull Paint paint2) {
         Node currentNode = mFirstNode;
+        Node nextNode;
+
         do {
-            final Node nextNode = currentNode.mNext;
+            nextNode = currentNode.mNext;
             if (nextNode == null) {
                 break;
             }
@@ -179,25 +174,32 @@ public class Foliage {
                 canvas.drawPoint(mCanvasSize - currentNode.mX + 1, currentNode.mY + 1, paint2);
             } else {
 
-//                if (mShape == 0) {
-                    canvas.drawLine(
-                            currentNode.mX,
-                            currentNode.mY,
-                            nextNode.mX,
-                            nextNode.mY,
-                            paint1
-                    );
-//                } else {
+                if (mRectMode != RECT_MODE_NONE) {
                     canvas.drawRect(
-                            currentNode.mX,
-                            currentNode.mY,
-                            nextNode.mX,
-                            nextNode.mY,
+                            currentNode.mX + 1,
+                            currentNode.mY + 1,
+                            nextNode.mX + 1,
+                            nextNode.mY + 1,
                             paint2
                     );
-//                }
-//                canvas.drawPoint(currentNode.mX, currentNode.mY, paint2);
-//                canvas.drawPoint(currentNode.mX + 1, currentNode.mY + 1, paint2);
+                } else {
+                    canvas.drawLine(
+                            currentNode.mX + 1,
+                            currentNode.mY + 1,
+                            nextNode.mX + 1,
+                            nextNode.mY + 1,
+                            paint2
+                    );
+                }
+
+                canvas.drawLine(
+                        currentNode.mX,
+                        currentNode.mY,
+                        nextNode.mX,
+                        nextNode.mY,
+                        paint1
+                );
+
             }
 
 
@@ -205,7 +207,8 @@ public class Foliage {
         } while (!mStopped && currentNode != mFirstNode);
     }
 
-    boolean update(final boolean isTouching) {
+    @Override
+    public boolean update(final boolean isTouching) {
 
         ++mAge;
         mStopped = false;
@@ -229,10 +232,6 @@ public class Foliage {
         return mAge < MAX_AGE;
     }
 
-    void stopPerforming() {
-        mStopped = true;
-    }
-
     private void addNodeNextTo(final Node node) {
         final Node oldNeighbour = node.mNext;
         if (oldNeighbour == null) {
@@ -248,13 +247,6 @@ public class Foliage {
         newNeighbour.mNext = oldNeighbour;
     }
 
-    private float getJitterValue() {
-        return mJitter * 0.5f - random(mJitter);
-    }
-
-    private static float random(final float maxValue) {
-        return (float) Math.random() * maxValue;
-    }
 
     private class Node {
 
