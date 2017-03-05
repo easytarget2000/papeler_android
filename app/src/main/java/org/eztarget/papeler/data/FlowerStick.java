@@ -1,6 +1,7 @@
-package org.eztarget.papeler;
+package org.eztarget.papeler.data;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
 
@@ -20,6 +21,8 @@ class FlowerStick extends Being {
 
     private Branch[] mBranches;
 
+    private Paint mLinePaint = new Paint();
+
     private int mInsertionIndex = NUM_OF_INITIAL_NODES / 2;
 
     private float mLastLineX;
@@ -34,6 +37,8 @@ class FlowerStick extends Being {
         mLastLineX = mBlossomX;
         mLastLineY = mCanvasHeight;
         mJitter = 3f;
+        mLinePaint.setAntiAlias(true);
+        mLinePaint.setColor(Color.WHITE);
     }
 
     @Override
@@ -42,7 +47,7 @@ class FlowerStick extends Being {
     }
 
     @Override
-    public void draw(@NonNull Canvas canvas, @NonNull Paint paint1, @NonNull Paint paint2) {
+    public void draw(@NonNull Canvas canvas, @NonNull Paint paint) {
 
         final float currentY = mCanvasHeight - mAge;
 
@@ -54,18 +59,22 @@ class FlowerStick extends Being {
 
                 final int numberOfPods = mRandom.nextInt(64 - 16) + 16;
 
-                final float sharedLength = mRandom.nextFloat() * mCanvasHeight * 0.5f * ((float) numberOfPods / 64);
+                final float sharedLength = random(
+                        mCanvasHeight * 0.3f * ((float) numberOfPods / 64)
+                );
 
                 for (int i = 0; i < numberOfBranches; i++) {
-                    final float angle = (TWO_PI * ((i + 1f) / (float) numberOfBranches)) + (mRandom.nextFloat() * (TWO_PI / 90f));
-                    final float length = sharedLength + (mRandom.nextFloat() * 0.01f * mCanvasHeight);
+                    final float angle;
+                    angle = (TWO_PI * ((i + 1f) / (float) numberOfBranches)) + random(TWO_PI / 90f);
+                    final float length = sharedLength + random(0.01f * mCanvasHeight);
+
                     mBranches[i] = new Branch(angle, length);
                 }
             }
 
             boolean somethingGrew = false;
             for (final Branch branch : mBranches) {
-                if (branch.drawAndUpdate(canvas, paint1, paint2)) {
+                if (branch.drawAndUpdate(canvas, paint)) {
                     somethingGrew = true;
                 }
             }
@@ -77,7 +86,8 @@ class FlowerStick extends Being {
 
         } else {
             final float newLineX = mBlossomX + getJitterValue();
-            canvas.drawLine(mLastLineX, mLastLineY, newLineX, currentY, paint1);
+            mLinePaint.setAlpha(paint.getAlpha());
+            canvas.drawLine(mLastLineX, mLastLineY, newLineX, currentY, mLinePaint);
             mLastLineX = newLineX;
             mLastLineY = currentY;
         }
@@ -97,8 +107,6 @@ class FlowerStick extends Being {
 
         private float mMaxPodRadius;
 
-        private Foliage mFoliage;
-
         private int mNumberOfPodsLeft;
 
         private Branch(final float angle, final float length) {
@@ -109,16 +117,16 @@ class FlowerStick extends Being {
             mNumberOfPodsLeft = mRandom.nextInt(6);
         }
 
-        private boolean drawAndUpdate(@NonNull Canvas canvas, @NonNull Paint paint1, @NonNull Paint paint2) {
+        private boolean drawAndUpdate(@NonNull Canvas canvas, @NonNull Paint paint) {
 
             final float x = mBlossomX + ((float) Math.cos(mAngle) * mCurrentLength);
             final float y = mBlossomY + ((float) Math.sin(mAngle) * mCurrentLength);
 
             if (mCurrentLength > mFinalLength) {
                 if (mNumberOfPodsLeft > 0) {
-                    paint2.setAlpha(mRandom.nextInt(255));
+                    paint.setAlpha(mRandom.nextInt(255));
 
-                    canvas.drawCircle(x, y, mRandom.nextFloat() * mMaxPodRadius, paint2);
+                    canvas.drawCircle(x, y, mRandom.nextFloat() * mMaxPodRadius, paint);
                     --mNumberOfPodsLeft;
                     return true;
                 } else {
@@ -131,7 +139,8 @@ class FlowerStick extends Being {
             final float newX = mBlossomX + ((float) Math.cos(mAngle) * mCurrentLength);
             final float newY = mBlossomY + ((float) Math.sin(mAngle) * mCurrentLength);
 
-            canvas.drawLine(x, y, newX, newY, paint1);
+            mLinePaint.setAlpha(paint.getAlpha());
+            canvas.drawLine(x, y, newX, newY, mLinePaint);
 
             return true;
         }

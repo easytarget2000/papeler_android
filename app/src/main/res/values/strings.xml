@@ -4,4 +4,6 @@
 
     <string name="main_welcome_msg">Touch the screen to place a drop.</string>
 
+    <string name="main_welcome_msg_2">Rotate your device to reset the drawings.</string>
+
 </resources>

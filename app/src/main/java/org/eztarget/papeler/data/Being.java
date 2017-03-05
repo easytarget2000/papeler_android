@@ -1,4 +1,4 @@
-package org.eztarget.papeler;
+package org.eztarget.papeler.data;
 
 import java.util.Random;
 
@@ -6,7 +6,7 @@ import java.util.Random;
  * Created by michelsievers on 04/03/2017.
  */
 
-abstract class Being implements UpdateAndDrawable {
+public abstract class Being implements UpdateAndDrawable {
 
     protected static final float TWO_PI = (float) Math.PI * 2f;
 
@@ -18,7 +18,7 @@ abstract class Being implements UpdateAndDrawable {
 
     protected Random mRandom = new Random();
 
-    void stopPerforming() {
+    public void stopPerforming() {
         mStopped = true;
     }
 
@@ -26,7 +26,7 @@ abstract class Being implements UpdateAndDrawable {
         return mJitter * 0.5f - random(mJitter);
     }
 
-    static float random(final float maxValue) {
-        return (float) Math.random() * maxValue;
+    protected float random(final float maxValue) {
+        return mRandom.nextFloat() * maxValue;
     }
 }

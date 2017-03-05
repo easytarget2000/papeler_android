@@ -11,6 +11,11 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
+import org.eztarget.papeler.data.Being;
+import org.eztarget.papeler.data.BeingBuilder;
+import org.eztarget.papeler.data.FlowerStickBuilder;
+import org.eztarget.papeler.data.FoliageBuilder;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -24,9 +29,7 @@ public class WayprService extends WallpaperService {
 
     private static final boolean CLEAR_FRAME = false;
 
-    private static final int PAINT_1_ALPHA = CLEAR_FRAME ? 200 : 30;
-
-    private static final int PAINT_2_ALPHA = CLEAR_FRAME ? 180 : 10;
+    private static final int PAINT_ALPHA = CLEAR_FRAME ? 200 : 30;
 
     private static final long MAX_TOUCH_AGE_MILLIS = 3L * 1000L;
 
@@ -56,9 +59,7 @@ public class WayprService extends WallpaperService {
 
         private ArrayList<Being> mBeings = new ArrayList<>();
 
-        private Paint mPaint1 = new Paint();
-
-        private Paint mPaint2 = new Paint();
+        private Paint mPaint = new Paint();
 
         private Paint mBitmapPaint = new Paint();
 
@@ -74,9 +75,11 @@ public class WayprService extends WallpaperService {
 
         private boolean mIsTouching = false;
 
-        private long mLastTouchMillis;
+        private int mBeingsCounter = 0;
 
-        private boolean mSymmetric;
+        private BeingBuilder mBeingBuilder;
+
+//        private boolean mBlur;
 
         private boolean mDrawing = false;
 
@@ -94,14 +97,9 @@ public class WayprService extends WallpaperService {
                 Log.d(TAG, "WayprEngine()");
             }
 
-            mPaint1.setAntiAlias(true);
-            mPaint1.setColor(Color.WHITE);
-            mPaint1.setStyle(Paint.Style.STROKE);
-            mPaint1.setStrokeWidth(1f);
-
-            mPaint2.setAntiAlias(true);
-            mPaint2.setStyle(Paint.Style.STROKE);
-            mPaint2.setStrokeWidth(1f);
+            mPaint.setAntiAlias(true);
+            mPaint.setStyle(Paint.Style.STROKE);
+            mPaint.setStrokeWidth(1f);
 
             mBitmapPaint.setColor(Color.WHITE);
         }
@@ -120,6 +118,20 @@ public class WayprService extends WallpaperService {
             if (PreferenceAccess.with(getApplicationContext()).getAndUnsetIsFirstTime()) {
                 final String welcomeMessage = getString(R.string.main_welcome_msg);
                 Toast.makeText(WayprService.this, welcomeMessage, Toast.LENGTH_LONG).show();
+
+                final String secondMessage = getString(R.string.main_welcome_msg_2);
+
+                final Toast secondToast;
+                secondToast = Toast.makeText(WayprService.this, secondMessage, Toast.LENGTH_LONG);
+                new Handler().postDelayed(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                secondToast.show();
+                            }
+                        },
+                        3000L
+                );
             }
         }
 
@@ -144,22 +156,17 @@ public class WayprService extends WallpaperService {
             mCanvas = new Canvas(mBitmap);
             mCanvas.drawColor(mBackgroundColor);
 
-            mSymmetric = new Random().nextBoolean();
-            if (mSymmetric) {
-                mAlphaOffset += 20;
-            } else {
-                mAlphaOffset -= 10;
+
+            switch ((int) (Math.random() * 5)) {
+                case 0:
+                    mBeingBuilder = new FlowerStickBuilder(mHeight);
+                    break;
+                default:
+                    mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight));
             }
 
+//            mBlur = true;
 //            if (new Random().nextInt(8) % 8 != 0) {
-//            if (true) {
-//                final float blurRadius = width * 0.1f;
-//                final MaskFilter blur;
-//                blur = new BlurMaskFilter(blurRadius, BlurMaskFilter.Blur.NORMAL);
-//                mPaint1.setMaskFilter(new BlurMaskFilter(blurRadius, BlurMaskFilter.Blur.NORMAL));
-//                mPaint2.setMaskFilter(new BlurMaskFilter(blurRadius, BlurMaskFilter.Blur.NORMAL));
-//                mAlphaOffset += 50;
-//            }
 
             if (mBeings != null) {
                 stopAllPerformances();
@@ -183,26 +190,13 @@ public class WayprService extends WallpaperService {
 //            Log.d(TAG, "onTouchEvent: " + event.getAction() + ": " + event.getDownTime());
 
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
-                addFoliage(event.getX(), event.getY());
-
-                final Random rnd = new Random();
-                mPaint2.setARGB(
-                        PAINT_2_ALPHA,
-                        64 + rnd.nextInt(192),
-                        64 + rnd.nextInt(192),
-                        64 + rnd.nextInt(192)
-                );
-
-                if (mFirstTouchMillis < 100L) {
+                mIsTouching = true;
+                if (mFirstTouchMillis == 0) {
                     mFirstTouchMillis = System.currentTimeMillis();
                 }
 
-                mIsTouching = true;
-                mPaint1.setAlpha(PAINT_1_ALPHA + mAlphaOffset);
-                mPaint2.setAlpha(PAINT_2_ALPHA + mAlphaOffset);
-
-                mLastTouchMillis = System.currentTimeMillis();
+                addBeing(event.getX(), event.getY());
+                adjustPaint();
 
                 mResetCanvasOnce = false;
                 nextStep();
@@ -215,12 +209,12 @@ public class WayprService extends WallpaperService {
             super.onTouchEvent(event);
         }
 
-        private void addFoliage(final float x, final float y) {
+        private void addBeing(final float x, final float y) {
 
             final long ageMinutes = (System.currentTimeMillis() - mFirstTouchMillis) / 1000L / 60L;
             if (ageMinutes > 30) {
-                if (mAlphaOffset > -(PAINT_1_ALPHA * 0.75)) {
-                    if (mAlphaOffset > (-PAINT_2_ALPHA * 0.75)) {
+                if (mAlphaOffset > -(PAINT_ALPHA * 0.75)) {
+                    if (mAlphaOffset > (-PAINT_ALPHA * 0.75)) {
                         mAlphaOffset -= 10;
                     }
                 }
@@ -230,24 +224,10 @@ public class WayprService extends WallpaperService {
                 return;
             }
 
-            final float canvasSize = Math.min(mWidth, mHeight);
+            mPaint.setAlpha(PAINT_ALPHA + mAlphaOffset);
 
-//            final Foliage foliage;
-//            switch ((int) (Math.random() * 3)) {
-//                case 0:
-//                    foliage = Foliage.lineInstance(x, y, mSymmetric, canvasSize);
-//                    break;
-//                default:
-//                    foliage = Foliage.circleInstance(x, y, mSymmetric, canvasSize);
-//            }
-
-            final Being being = new FlowerStick(mHeight, x, y);
-//            mAlphaOffset += 50;
-
-            mPaint1.setAlpha(PAINT_1_ALPHA + mAlphaOffset);
-            mPaint2.setAlpha(PAINT_2_ALPHA + mAlphaOffset);
-
-            mBeings.add(being);
+            mBeings.add(mBeingBuilder.build(x, y));
+            ++mBeingsCounter;
         }
 
         private void draw() {
@@ -285,7 +265,7 @@ public class WayprService extends WallpaperService {
                         hadAnyMovement |= beingGrew;
 
                         if (!mIsTouching) {
-                            being.draw(mCanvas, mPaint1, mPaint2);
+                            being.draw(mCanvas, mPaint);
                         }
 
                         if (!beingGrew) {
@@ -345,6 +325,28 @@ public class WayprService extends WallpaperService {
             for (final Being being : mBeings) {
                 being.stopPerforming();
             }
+        }
+
+        private void adjustPaint() {
+            final Random rnd = new Random();
+            if (rnd.nextInt(mBeingsCounter) > 4) {
+                mPaint.setColor(Color.BLACK);
+                mPaint.setStrokeWidth(4f);
+            } else {
+                mPaint.setARGB(
+                        PAINT_ALPHA + mAlphaOffset,
+                        160 + rnd.nextInt(96),
+                        160 + rnd.nextInt(96),
+                        160 + rnd.nextInt(96)
+                );
+            }
+
+//            if (mBlur) {
+//                final float blurRadius = ((float) width) * 0.01f;
+//                final MaskFilter blur = new BlurMaskFilter(blurRadius, BlurMaskFilter.Blur.NORMAL);
+//                mPaint.setMaskFilter(blur);
+//                mPaint.setAlpha(mPaint.getAlpha() + 150);
+//            }
         }
 
     }
