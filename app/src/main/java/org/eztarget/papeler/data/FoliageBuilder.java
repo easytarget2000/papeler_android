@@ -56,6 +56,7 @@ public class FoliageBuilder implements BeingBuilder {
 //                foliage.initLine(x, y);
 //                break;
             default:
+//                foliage.initPolygon(x, y);
                 foliage.initCircle(x, y);
         }
 

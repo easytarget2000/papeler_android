@@ -8,13 +8,13 @@ import java.util.Random;
 
 public abstract class Being implements UpdateAndDrawable {
 
-    protected static final float TWO_PI = (float) Math.PI * 2f;
+    protected static final double TWO_PI = Math.PI * 2;
 
     protected boolean mStopped = false;
 
     protected int mAge = 0;
 
-    protected float mJitter;
+    protected double mJitter;
 
     protected Random mRandom = new Random();
 
@@ -22,11 +22,11 @@ public abstract class Being implements UpdateAndDrawable {
         mStopped = true;
     }
 
-    protected float getJitterValue() {
-        return mJitter * 0.5f - random(mJitter);
+    protected double getJitterValue() {
+        return mJitter * 0.5 - random(mJitter);
     }
 
-    protected float random(final float maxValue) {
-        return mRandom.nextFloat() * maxValue;
+    protected double random(final double maxValue) {
+        return mRandom.nextDouble() * maxValue;
     }
 }

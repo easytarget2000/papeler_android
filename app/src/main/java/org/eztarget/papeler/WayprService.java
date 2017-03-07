@@ -29,7 +29,7 @@ public class WayprService extends WallpaperService {
 
     private static final boolean CLEAR_FRAME = false;
 
-    private static final int PAINT_ALPHA = CLEAR_FRAME ? 200 : 20;
+    private static final int PAINT_ALPHA = CLEAR_FRAME ? 200 : 16;
 
     private static final long MAX_TOUCH_AGE_MILLIS = 3L * 1000L;
 

@@ -11,11 +11,11 @@ class FlowerStick extends Being {
 
     private static final int NUM_OF_INITIAL_NODES = 48;
 
-    private float mBlossomX;
+    private double mBlossomX;
 
-    private float mBlossomY;
+    private double mBlossomY;
 
-    private float mCanvasHeight;
+    private double mCanvasHeight;
 
     private boolean mGrowing = true;
 
@@ -29,13 +29,13 @@ class FlowerStick extends Being {
 
     private float mLastLineY;
 
-    FlowerStick(final float canvasHeight, final float x, final float y) {
+    FlowerStick(final double canvasHeight, final double x, final double y) {
         mCanvasHeight = canvasHeight;
         mJitter = mCanvasHeight * 0.001f;
         mBlossomX = x;
         mBlossomY = y;
-        mLastLineX = mBlossomX;
-        mLastLineY = mCanvasHeight;
+        mLastLineX = (float) mBlossomX;
+        mLastLineY = (float) mCanvasHeight;
         mJitter = 3f;
         mLinePaint.setAntiAlias(true);
         mLinePaint.setColor(Color.WHITE);
@@ -49,7 +49,7 @@ class FlowerStick extends Being {
     @Override
     public void draw(@NonNull Canvas canvas, @NonNull Paint paint) {
 
-        final float currentY = mCanvasHeight - mAge;
+        final float currentY = (float) mCanvasHeight - mAge;
 
         if (currentY < mBlossomY) {
 
@@ -59,14 +59,14 @@ class FlowerStick extends Being {
 
                 final int numberOfPods = mRandom.nextInt(64 - 16) + 16;
 
-                final float sharedLength = random(
-                        mCanvasHeight * 0.3f * ((float) numberOfPods / 64)
+                final double sharedLength = random(
+                        mCanvasHeight / 3 * (numberOfPods / 64.0)
                 );
 
                 for (int i = 0; i < numberOfBranches; i++) {
-                    final float angle;
-                    angle = (TWO_PI * ((i + 1f) / (float) numberOfBranches)) + random(TWO_PI / 90f);
-                    final float length = sharedLength + random(0.01f * mCanvasHeight);
+                    final double angle;
+                    angle = (TWO_PI * ((i + 1.0) / numberOfBranches)) + random(TWO_PI / 90);
+                    final double length = sharedLength + random(mCanvasHeight / 100.0);
 
                     mBranches[i] = new Branch(angle, length);
                 }
@@ -85,9 +85,15 @@ class FlowerStick extends Being {
             return;
 
         } else {
-            final float newLineX = mBlossomX + getJitterValue();
+            final float newLineX = (float) (mBlossomX + getJitterValue());
             mLinePaint.setAlpha(paint.getAlpha());
-            canvas.drawLine(mLastLineX, mLastLineY, newLineX, currentY, mLinePaint);
+            canvas.drawLine(
+                    mLastLineX,
+                    mLastLineY,
+                    newLineX,
+                    currentY,
+                    mLinePaint
+            );
             mLastLineX = newLineX;
             mLastLineY = currentY;
         }
@@ -97,30 +103,30 @@ class FlowerStick extends Being {
 
     private class Branch {
 
-        private float mCurrentLength = 0f;
+        private double mCurrentLength = 0f;
 
-        private float mFinalLength;
+        private double mFinalLength;
 
-        private float mSpeed;
+        private double mSpeed;
 
-        private float mAngle;
+        private double mAngle;
 
         private float mMaxPodRadius;
 
         private int mNumberOfPodsLeft;
 
-        private Branch(final float angle, final float length) {
+        private Branch(final double angle, final double length) {
             mFinalLength = length;
             mSpeed = mCanvasHeight * 0.01f * mRandom.nextFloat();
             mAngle = angle;
-            mMaxPodRadius = mRandom.nextFloat() * mCanvasHeight * 0.01f;
+            mMaxPodRadius = mRandom.nextFloat() * (float) mCanvasHeight * 0.01f;
             mNumberOfPodsLeft = mRandom.nextInt(6);
         }
 
         private boolean drawAndUpdate(@NonNull Canvas canvas, @NonNull Paint paint) {
 
-            final float x = mBlossomX + ((float) Math.cos(mAngle) * mCurrentLength);
-            final float y = mBlossomY + ((float) Math.sin(mAngle) * mCurrentLength);
+            final float x = (float) (mBlossomX + (Math.cos(mAngle) * mCurrentLength));
+            final float y = (float) (mBlossomY + (Math.sin(mAngle) * mCurrentLength));
 
             if (mCurrentLength > mFinalLength) {
                 if (mNumberOfPodsLeft > 0) {
@@ -136,8 +142,8 @@ class FlowerStick extends Being {
 
             mCurrentLength += mSpeed;
 
-            final float newX = mBlossomX + ((float) Math.cos(mAngle) * mCurrentLength);
-            final float newY = mBlossomY + ((float) Math.sin(mAngle) * mCurrentLength);
+            final float newX = (float) (mBlossomX + (Math.cos(mAngle) * mCurrentLength));
+            final float newY = (float) (mBlossomY + (Math.sin(mAngle) * mCurrentLength));
 
             mLinePaint.setAlpha(paint.getAlpha());
             canvas.drawLine(x, y, newX, newY, mLinePaint);
