@@ -54,7 +54,7 @@ class FlowerStick extends Being {
         if (currentY < mBlossomY) {
 
             if (mBranches == null) {
-                final int numberOfBranches = 8 + mRandom.nextInt(24);
+                final int numberOfBranches = 8 + mRandom.nextInt(64);
                 mBranches = new Branch[numberOfBranches];
 
                 final int numberOfPods = mRandom.nextInt(64 - 16) + 16;

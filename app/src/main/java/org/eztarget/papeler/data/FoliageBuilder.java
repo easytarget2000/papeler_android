@@ -16,28 +16,28 @@ public class FoliageBuilder implements BeingBuilder {
 
     private boolean mSymmetric;
 
-    private int mRectMode;
+    private int mPaintMode;
 
     public FoliageBuilder(final float canvasSize) {
         final Random random = new Random();
 
         this.mCanvasSize = canvasSize;
-        this.mSymmetric = random.nextInt(4) % 4 == 0;
-        if (this.mSymmetric) {
-            this.mRectMode = (random.nextInt(2) % 2 == 0) ? Foliage.LINE_MODE : Foliage.CIRCLE_MODE;
-        } else {
+        this.mSymmetric = random.nextInt(3) % 3 == 0;
+//        if (this.mSymmetric) {
+//            this.mPaintMode = (random.nextInt(2) % 2 == 0) ? Foliage.LINE_MODE : Foliage.CIRCLE_MODE;
+//        } else {
             if (random.nextBoolean()) {
-                this.mRectMode = Foliage.LINE_MODE;
+                this.mPaintMode = Foliage.LINE_MODE;
             } else {
-                this.mRectMode = random.nextInt(4);
+                this.mPaintMode = random.nextInt(4);
             }
-        }
+//        }
 
         Log.d(
                 TAG,
                 "Initialized. Canvas size: " + canvasSize
                         + ", symmetry: " + mSymmetric
-                        + ", mode: " + mRectMode
+                        + ", mode: " + mPaintMode
         );
     }
 
@@ -47,16 +47,16 @@ public class FoliageBuilder implements BeingBuilder {
 
         final Foliage foliage = new Foliage(mCanvasSize);
         foliage.setSymmetric(mSymmetric);
-        foliage.setRectMode(mRectMode);
+        foliage.setRectMode(mPaintMode);
         switch (random.nextInt(6)) {
             case 0:
-                foliage.initSine(x, y);
+                foliage.initSquare(x, y);
                 break;
-            case 1:
-                foliage.initLine(x, y);
-                break;
+//            case 1:
+//                foliage.initLine(x, y);
+//                break;
             default:
-                foliage.initInCircleShape(x, y);
+                foliage.initCircle(x, y);
         }
 
         Log.d(TAG, "Built Foliage at " + x + ", " + y + ".");

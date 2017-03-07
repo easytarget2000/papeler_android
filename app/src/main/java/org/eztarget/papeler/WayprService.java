@@ -29,7 +29,7 @@ public class WayprService extends WallpaperService {
 
     private static final boolean CLEAR_FRAME = false;
 
-    private static final int PAINT_ALPHA = CLEAR_FRAME ? 200 : 30;
+    private static final int PAINT_ALPHA = CLEAR_FRAME ? 200 : 20;
 
     private static final long MAX_TOUCH_AGE_MILLIS = 3L * 1000L;
 
@@ -156,6 +156,11 @@ public class WayprService extends WallpaperService {
             mCanvas = new Canvas(mBitmap);
             mCanvas.drawColor(mBackgroundColor);
 
+            if (new Random().nextInt(7) > 4) {
+                mPaint.setStyle(Paint.Style.STROKE);
+            } else {
+                mPaint.setStyle(Paint.Style.FILL);
+            }
 
             switch ((int) (Math.random() * 5)) {
                 case 0:
@@ -171,6 +176,7 @@ public class WayprService extends WallpaperService {
             if (mBeings != null) {
                 stopAllPerformances();
                 mBeings = new ArrayList<>();
+                mBeingsCounter = 0;
 
                 // Draw once to clear everything.
                 mResetCanvasOnce = true;
@@ -328,6 +334,11 @@ public class WayprService extends WallpaperService {
         }
 
         private void adjustPaint() {
+
+            if (mPaint.getStyle() == Paint.Style.FILL) {
+                mAlphaOffset *= 0.5f;
+            }
+
             final Random rnd = new Random();
             if (rnd.nextInt(mBeingsCounter) > 4) {
                 mPaint.setColor(Color.BLACK);

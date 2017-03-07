@@ -11,11 +11,13 @@ class Foliage extends Being {
 
     private static final int NUM_OF_INITIAL_NODES = 48;
 
-    private static final float TWO_PI = (float) Math.PI * 2f;
+    private static final float PI = (float) Math.PI;
 
-    private static final int MAX_AGE = 64;
+    private static final float TWO_PI = PI * 2f;
 
-    private static final int ADD_NODE_LIMIT = 96;
+    private static final int MAX_AGE = 80;
+
+    private static final int ADD_NODE_LIMIT = 80;
 
     private static final float PUSH_FORCE = 16f;
 
@@ -31,9 +33,7 @@ class Foliage extends Being {
 
     static final int CIRCLE_MODE = 2;
 
-    private int mRectMode;
-
-    private float mNodeSize;
+    private int mPaintMode;
 
     private float mNodeDensity;
 
@@ -49,13 +49,19 @@ class Foliage extends Being {
 
     Foliage(final float canvasSize) {
         mCanvasSize = canvasSize;
-        mNodeSize = canvasSize / 300f;
-        mNodeRadius = mNodeSize * 0.5f;
+        final float nodeSize = canvasSize / 300f;
+        mNodeRadius = nodeSize * 0.5f;
+        mNodeDensity = 10 + mRandom.nextInt(30);
         mNeighbourGravity = mNodeRadius * 0.5f;
         mMaxPushDistance = canvasSize * 0.1f;
         mJitter = mCanvasSize * 0.001f;
 
-        Log.d(TAG, "Initialized: node size: " + mNodeSize + ", rect mode: " + mRectMode);
+        Log.d(
+                TAG,
+                "Initialized: node size: " + nodeSize
+                        + ", rect mode: " + mPaintMode
+                        + ", node density: " + mNodeDensity
+        );
     }
 
     void setSymmetric(final boolean symmetric) {
@@ -63,7 +69,55 @@ class Foliage extends Being {
     }
 
     void setRectMode(final int rectMode) {
-        mRectMode = rectMode;
+        mPaintMode = rectMode;
+    }
+
+    Foliage initSquare(final float x, final float y) {
+        final float sideLength = random(mCanvasSize * 0.15f) + (mCanvasSize * 0.01f);
+        final float sideLengthHalf = sideLength * 0.5f;
+
+        Log.d(TAG, "initSquare()");
+
+        final int quarterOfInitialNodes = NUM_OF_INITIAL_NODES / 4;
+
+        Node lastNode = null;
+        for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
+            final Node node = new Node();
+
+            if (i < quarterOfInitialNodes) {
+                node.mX = (x - sideLengthHalf) + (sideLength * ((float) i / quarterOfInitialNodes));
+                node.mY = y - sideLengthHalf;
+            } else if (i < quarterOfInitialNodes * 2) {
+                node.mX = x + sideLengthHalf;
+                node.mY = (y - sideLengthHalf)
+                        + (sideLength * (((float) i - quarterOfInitialNodes) / quarterOfInitialNodes));
+            } else if (i < quarterOfInitialNodes * 3) {
+                node.mX = (x + sideLengthHalf) - (sideLength * (((float) i - (quarterOfInitialNodes * 2)) / quarterOfInitialNodes));
+                node.mY = y + sideLengthHalf;
+            } else {
+                node.mX = x - sideLengthHalf;
+                node.mY = (y + sideLengthHalf)
+                        - (sideLength * (
+                        ((float) i - (quarterOfInitialNodes * 3)) / quarterOfInitialNodes)
+                );
+            }
+
+            if (mFirstNode == null) {
+                mFirstNode = node;
+                lastNode = node;
+            } else if (i == NUM_OF_INITIAL_NODES - 1) {
+                mPreferredNeighbourDistance = node.distance(lastNode);
+                mPreferredNeighbourDistanceHalf = mPreferredNeighbourDistance * 0.5f;
+                node.mNext = mFirstNode;
+                lastNode.mNext = node;
+            } else {
+                lastNode.mNext = node;
+                lastNode = node;
+            }
+
+        }
+
+        return this;
     }
 
     Foliage initSine(final float x, final float y) {
@@ -71,9 +125,7 @@ class Foliage extends Being {
         final float lineLength = random(mCanvasSize * 0.5f);
         final float lineSinHeight = lineLength / 6f;
 
-        mNodeDensity = 10 + mRandom.nextInt(30);
-
-        Log.d("Foliage()", "Sine init. Node density: " + mNodeDensity);
+        Log.d(TAG, "initSine()");
 
         Node lastNode = null;
         for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
@@ -100,22 +152,24 @@ class Foliage extends Being {
         return this;
     }
 
-    Foliage initInCircleShape(final float x, final float y) {
+    Foliage initCircle(final float x, final float y) {
         final float initialRadius = random(mCanvasSize * 0.01f) + mCanvasSize * 0.05f;
-        mNodeDensity = 10 + mRandom.nextInt(30);
 
-        final boolean closedCircle = mRandom.nextBoolean();
+//        final boolean closedCircle = mRandom.nextInt(4) > 1;
+        final boolean closedCircle = true;
         final float arcStart;
         final float arcEnd;
         if (closedCircle) {
             arcStart = 0f;
             arcEnd = TWO_PI;
         } else {
-            arcStart = random(TWO_PI);
-            arcEnd = random(TWO_PI);
+            arcStart = random(PI);
+            arcEnd = arcStart + random(PI);
         }
 
-        Log.d("Foliage()", "Circle init. Node density: " + mNodeDensity);
+        final float squeezeFactor = random(0.66f) + 0.66f;
+
+        Log.d(TAG, "initCircle(): From " + arcStart + " to " + arcEnd + ", radius: " + initialRadius);
 
         Node lastNode = null;
         for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
@@ -124,7 +178,7 @@ class Foliage extends Being {
             final float angleOfNode = arcStart + (arcEnd * ((i + 1f) / NUM_OF_INITIAL_NODES));
 
             node.mX = x
-                    + ((float) Math.cos(angleOfNode) * initialRadius)
+                    + (((float) Math.cos(angleOfNode) * initialRadius) * squeezeFactor)
                     + getJitterValue();
             node.mY = y
                     + ((float) Math.sin(angleOfNode) * initialRadius)
@@ -155,8 +209,6 @@ class Foliage extends Being {
         final float lineAngle = random(TWO_PI);
         final float lineCos = (float) Math.cos(lineAngle);
         final float lineSin = (float) Math.sin(lineAngle);
-
-        mNodeDensity = 10 + mRandom.nextInt(30);
 
         Log.d("Foliage()", "Line init. Node density: " + mNodeDensity);
 
@@ -195,83 +247,107 @@ class Foliage extends Being {
                 break;
             }
 
-            if (mSymmetric) {
-
-
-                switch (mRectMode) {
-                    case CIRCLE_MODE:
-                        paint.setAlpha(20);
-
-                        canvas.drawCircle(
-                                currentNode.mX,
-                                currentNode.mY,
-                                mNodeRadius,
-                                paint
-                        );
-                        canvas.drawCircle(
-                                currentNode.mX,
-                                currentNode.mY,
-                                random(mNodeRadius * 8f),
-                                paint
-                        );
-                        break;
-
-                    default:
-                        paint.setAlpha(32);
-
-                        canvas.drawPoint(currentNode.mX, currentNode.mY, paint);
-                        canvas.drawPoint(currentNode.mX, currentNode.mY + 1, paint);
-                        canvas.drawPoint(currentNode.mX + 1, currentNode.mY + 1, paint);
-
-                        canvas.drawPoint(mCanvasSize - currentNode.mX, currentNode.mY, paint);
-                        canvas.drawPoint(mCanvasSize - currentNode.mX, currentNode.mY + 1, paint);
-                        canvas.drawPoint(
-                                mCanvasSize - currentNode.mX + 1,
-                                currentNode.mY + 1,
-                                paint
-                        );
-                }
-
-            } else {
-
-
-                switch (mRectMode) {
-                    case RECT_MODE:
-                        paint.setAlpha(20);
-                        canvas.drawRect(
-                                currentNode.mX,
-                                currentNode.mY,
-                                nextNode.mX,
-                                nextNode.mY,
-                                paint
-                        );
-                        break;
-                    case CIRCLE_MODE:
-                        paint.setAlpha(16);
-                        canvas.drawCircle(
-                                currentNode.mX,
-                                currentNode.mY,
-                                random(mNodeRadius * 8f),
-                                paint
-                        );
-                        break;
-                    default:
-                        paint.setAlpha(40);
-
-                        canvas.drawLine(
-                                currentNode.mX,
-                                currentNode.mY,
-                                nextNode.mX,
-                                nextNode.mY,
-                                paint
-                        );
-                }
-
-            }
-
+            draw(canvas, paint, currentNode, nextNode);
 
             currentNode = nextNode;
         } while (!mStopped && currentNode != mFirstNode);
+    }
+
+    private void draw(
+            @NonNull Canvas canvas,
+            @NonNull Paint paint,
+            @NonNull Node node1,
+            @NonNull Node node2
+    ) {
+
+        if (mSymmetric) {
+
+            switch (mPaintMode) {
+                case RECT_MODE:
+                    canvas.drawRect(
+                            node1.mX,
+                            node1.mY,
+                            node2.mX,
+                            node2.mY,
+                            paint
+                    );
+                    canvas.drawRect(
+                            mCanvasSize - node1.mX,
+                            node1.mY,
+                            mCanvasSize - node2.mX,
+                            node2.mY,
+                            paint
+                    );
+                    break;
+
+//                case CIRCLE_MODE:
+//                    paint.setAlpha(20);
+//                    canvas.drawCircle(
+//                            node1.mX,
+//                            node1.mY,
+//                            mNodeRadius,
+//                            paint
+//                    );
+//                    canvas.drawCircle(
+//                            node1.mX,
+//                            node1.mY,
+//                            random(mNodeRadius * 8f),
+//                            paint
+//                    );
+//                    break;
+
+                default:
+                    paint.setAlpha(32);
+
+                    canvas.drawPoint(node1.mX, node1.mY, paint);
+                    canvas.drawPoint(node1.mX, node1.mY + 1, paint);
+                    canvas.drawPoint(node1.mX + 1, node1.mY + 1, paint);
+
+                    canvas.drawPoint(mCanvasSize - node1.mX, node1.mY, paint);
+                    canvas.drawPoint(mCanvasSize - node1.mX, node1.mY + 1, paint);
+                    canvas.drawPoint(
+                            mCanvasSize - node1.mX + 1,
+                            node1.mY + 1,
+                            paint
+                    );
+            }
+
+        } else {
+
+            switch (mPaintMode) {
+                case RECT_MODE:
+                    paint.setAlpha(20);
+                    canvas.drawRect(
+                            node1.mX,
+                            node1.mY,
+                            node2.mX,
+                            node2.mY,
+                            paint
+                    );
+                    break;
+//                case CIRCLE_MODE:
+//                    paint.setAlpha(16);
+//                    canvas.drawCircle(
+//                            node1.mX,
+//                            node1.mY,
+//                            random(mNodeRadius * 8f),
+//                            paint
+//                    );
+//                    break;
+
+                default:
+                    paint.setAlpha(40);
+
+                    canvas.drawLine(
+                            node1.mX,
+                            node1.mY,
+                            node2.mX,
+                            node2.mY,
+                            paint
+                    );
+            }
+
+        }
     }
 
     @Override
