@@ -1,6 +1,7 @@
 package org.eztarget.papeler.data;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -234,29 +235,18 @@ class Foliage extends Being {
 
     Foliage initPolygon(final double x, final double y) {
 
-        final int numberOfEdges = 4;
+        final int numberOfEdges = mRandom.nextInt(5) + 3;
         final int nodesPerEdge = NUM_OF_INITIAL_NODES / numberOfEdges;
         final double size = mCanvasSize / 5.0;
 
-//        for (int edge = 1; edge <= numberOfEdges; edge++) {
-//            final double angle = TWO_PI * edge / numberOfEdges;
-//            final float x = (float) (x + radius * Math.cos(angle));
-//            final float y = (float) (y + radius * Math.sin(angle));
-//
-//            if (edge == 1) {
-//                polygonPath.moveTo(x, y);
-//            } else {
-//                polygonPath.lineTo(x, y);
-//            }
-//
-//        }
+        final double polygonAngle = random(TWO_PI);
 
         Node lastNode = null;
         for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
 
-            final double edge = (i + 1) / nodesPerEdge;
-            final double angleOfEdge1 = TWO_PI * edge / numberOfEdges;
-            final double angleOfEdge2 = TWO_PI * (edge + 1) / numberOfEdges;
+            final double edge = i / nodesPerEdge;
+            final double angleOfEdge1 = polygonAngle + (TWO_PI * edge / numberOfEdges);
+            final double angleOfEdge2 = polygonAngle + (TWO_PI * (edge + 1) / numberOfEdges);
 
             final double edge1X = x + (size * Math.cos(angleOfEdge1));
             final double edge1Y = y + (size * Math.sin(angleOfEdge1));
@@ -264,14 +254,16 @@ class Foliage extends Being {
             final double edge2X = x + (size * Math.cos(angleOfEdge2));
             final double edge2Y = y + (size * Math.sin(angleOfEdge2));
 
-            final double angleBetweenEdges = angle(edge1X, edge1Y, edge2X, edge2Y);
-            final double nodeRelativeToEdge1 = (i - ((edge - 1) * (double) nodesPerEdge)) / (double) nodesPerEdge;
+//            Log.d(TAG, "Edge 1: " + edge1X + ", " + edge1Y);
+//            Log.d(TAG, "Edge 2: " + edge2X + ", " + edge2Y);
 
-            Log.d(TAG, "i: " + i + ", edge: " + edge + ", angleBetweenEdges: " + angleBetweenEdges + ", nodeRelativeToEdge1: " + nodeRelativeToEdge1);
+            final double angleBetweenEdges = angle(edge1X, edge1Y, edge2X, edge2Y);
+            final double nodeRelativeToEdge1 = (i  - (edge * (double) nodesPerEdge)) / (double) nodesPerEdge;
+//            Log.d(TAG, "i: " + i + ", edge: " + edge + ", angleBetweenEdges: " + angleBetweenEdges + ", nodeRelativeToEdge1: " + nodeRelativeToEdge1);
 
             final Node node = new Node();
-            node.mX = edge1X + (Math.cos(angleBetweenEdges) * nodeRelativeToEdge1);
-            node.mY = edge1Y + (Math.sin(angleBetweenEdges) * nodeRelativeToEdge1);
+            node.mX = edge1X + (Math.cos(angleBetweenEdges) * nodeRelativeToEdge1 * size);
+            node.mY = edge1Y + (Math.sin(angleBetweenEdges) * nodeRelativeToEdge1 * size);
 
             if (mFirstNode == null) {
                 mFirstNode = node;
@@ -302,10 +294,30 @@ class Foliage extends Being {
                 break;
             }
 
+//            debugDraw(canvas, paint, currentNode, nextNode);
             draw(canvas, paint, currentNode, nextNode);
 
             currentNode = nextNode;
         } while (!mStopped && currentNode != mFirstNode);
+    }
+
+    private void debugDraw(
+            @NonNull Canvas canvas,
+            @NonNull Paint paint,
+            @NonNull Node node1,
+            @NonNull Node node2
+    ) {
+        paint.setColor(
+                Color.argb(255, mRandom.nextInt(256), mRandom.nextInt(256), mRandom.nextInt(256))
+        );
+
+        canvas.drawLine(
+                (float) node1.mX,
+                (float) node1.mY,
+                (float) node2.mX,
+                (float) node2.mY,
+                paint
+        );
     }
 
     private void draw(
@@ -319,6 +331,7 @@ class Foliage extends Being {
 
             switch (mPaintMode) {
                 case RECT_MODE:
+                    paint.setAlpha(32);
                     canvas.drawRect(
                             (float) node1.mX,
                             (float) node1.mY,
@@ -334,22 +347,6 @@ class Foliage extends Being {
                             paint
                     );
                     break;
-
-//                case CIRCLE_MODE:
-//                    paint.setAlpha(20);
-//                    canvas.drawCircle(
-//                            node1.mX,
-//                            node1.mY,
-//                            mNodeRadius,
-//                            paint
-//                    );
-//                    canvas.drawCircle(
-//                            node1.mX,
-//                            node1.mY,
-//                            random(mNodeRadius * 8f),
-//                            paint
-//                    );
-//                    break;
 
                 default:
                     paint.setAlpha(32);
@@ -371,7 +368,6 @@ class Foliage extends Being {
 
             switch (mPaintMode) {
                 case RECT_MODE:
-                    paint.setAlpha(20);
                     canvas.drawRect(
                             (float) node1.mX,
                             (float) node1.mY,

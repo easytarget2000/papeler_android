@@ -26,11 +26,11 @@ public class FoliageBuilder implements BeingBuilder {
 //        if (this.mSymmetric) {
 //            this.mPaintMode = (random.nextInt(2) % 2 == 0) ? Foliage.LINE_MODE : Foliage.CIRCLE_MODE;
 //        } else {
-            if (random.nextBoolean()) {
-                this.mPaintMode = Foliage.LINE_MODE;
-            } else {
-                this.mPaintMode = random.nextInt(4);
-            }
+        if (random.nextBoolean()) {
+            this.mPaintMode = Foliage.LINE_MODE;
+        } else {
+            this.mPaintMode = random.nextInt(4);
+        }
 //        }
 
         Log.d(
@@ -50,15 +50,13 @@ public class FoliageBuilder implements BeingBuilder {
         foliage.setRectMode(mPaintMode);
         switch (random.nextInt(6)) {
             case 0:
-                foliage.initSquare(x, y);
+                foliage.initPolygon(x, y);
                 break;
-//            case 1:
-//                foliage.initLine(x, y);
-//                break;
+
             default:
-//                foliage.initPolygon(x, y);
                 foliage.initCircle(x, y);
         }
+
 
         Log.d(TAG, "Built Foliage at " + x + ", " + y + ".");
 

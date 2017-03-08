@@ -33,9 +33,13 @@ public class WayprService extends WallpaperService {
 
     private static final long MAX_TOUCH_AGE_MILLIS = 3L * 1000L;
 
-    private static final float MAX_TOUCH_AGE_FLOATIES = (float) MAX_TOUCH_AGE_MILLIS;
+    private static final float DEFAULT_STROKE_WIDTH = 1f;
 
-    private static final int DENSITY = 10;
+    private static final float BLACK_STROKE_WIDTH = 3f;
+
+    private static final float BRIGHTNESS_BEFORE_BLACK = 0.3f;
+
+    private static final int BRIGHTNESS_SAMPLE_SIZE = 128;
 
     private static final boolean VERBOSE = false;
 
@@ -79,8 +83,6 @@ public class WayprService extends WallpaperService {
 
         private BeingBuilder mBeingBuilder;
 
-//        private boolean mBlur;
-
         private boolean mDrawing = false;
 
         private long mFirstTouchMillis;
@@ -99,7 +101,7 @@ public class WayprService extends WallpaperService {
 
             mPaint.setAntiAlias(true);
             mPaint.setStyle(Paint.Style.STROKE);
-            mPaint.setStrokeWidth(1f);
+            mPaint.setStrokeWidth(DEFAULT_STROKE_WIDTH);
 
             mBitmapPaint.setColor(Color.WHITE);
         }
@@ -156,11 +158,12 @@ public class WayprService extends WallpaperService {
             mCanvas = new Canvas(mBitmap);
             mCanvas.drawColor(mBackgroundColor);
 
-            if (new Random().nextInt(7) > 4) {
-                mPaint.setStyle(Paint.Style.STROKE);
-            } else {
-                mPaint.setStyle(Paint.Style.FILL);
-            }
+            mPaint.setStyle(Paint.Style.STROKE);
+//            if (new Random().nextInt(7) > 4) {
+//                mPaint.setStyle(Paint.Style.STROKE);
+//            } else {
+//                mPaint.setStyle(Paint.Style.FILL);
+//            }
 
             switch ((int) (Math.random() * 5)) {
                 case 0:
@@ -169,9 +172,6 @@ public class WayprService extends WallpaperService {
                 default:
                     mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight));
             }
-
-//            mBlur = true;
-//            if (new Random().nextInt(8) % 8 != 0) {
 
             if (mBeings != null) {
                 stopAllPerformances();
@@ -193,8 +193,6 @@ public class WayprService extends WallpaperService {
         @Override
         public void onTouchEvent(MotionEvent event) {
 
-//            Log.d(TAG, "onTouchEvent: " + event.getAction() + ": " + event.getDownTime());
-
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 mIsTouching = true;
                 if (mFirstTouchMillis == 0) {
@@ -202,7 +200,7 @@ public class WayprService extends WallpaperService {
                 }
 
                 addBeing(event.getX(), event.getY());
-                adjustPaint();
+                adjustPaint((int) event.getX(),(int) event.getY());
 
                 mResetCanvasOnce = false;
                 nextStep();
@@ -244,10 +242,10 @@ public class WayprService extends WallpaperService {
             cancelDrawSchedule();
             mDrawing = true;
 
-            final long startMillis = System.currentTimeMillis();
             if (VERBOSE) {
                 Log.d(TAG, "WayprEngine.draw()");
             }
+            final long startMillis = System.currentTimeMillis();
 
             final SurfaceHolder holder = getSurfaceHolder();
             Canvas canvas = null;
@@ -333,17 +331,43 @@ public class WayprService extends WallpaperService {
             }
         }
 
-        private void adjustPaint() {
+        private void adjustPaint(final int x, final int y) {
 
             if (mPaint.getStyle() == Paint.Style.FILL) {
                 mAlphaOffset *= 0.5f;
             }
 
             final Random rnd = new Random();
-            if (rnd.nextInt(mBeingsCounter) > 4) {
+
+            final int maxSampleDistance = mBitmap.getWidth() / 5;
+            final int maxSampleDistanceHalf = maxSampleDistance / 2;
+            double brightnessAroundPoint = 0;
+            for (int i = 0; i < BRIGHTNESS_SAMPLE_SIZE; i++) {
+                final int colorAtRandomPoint = mBitmap.getPixel(
+                        x - maxSampleDistanceHalf + rnd.nextInt(maxSampleDistance),
+                        y - maxSampleDistanceHalf + rnd.nextInt(maxSampleDistance)
+                );
+
+                float hsvAtRandomPoint[] = new float[3];
+                Color.colorToHSV(colorAtRandomPoint, hsvAtRandomPoint);
+
+                brightnessAroundPoint +=
+                        (Color.alpha(colorAtRandomPoint) / 256f) * hsvAtRandomPoint[2];
+            }
+
+            brightnessAroundPoint /= (double) BRIGHTNESS_SAMPLE_SIZE;
+
+            if (VERBOSE) {
+                Log.d(TAG, "adjustPaint(): brightnessAroundPoint: " + brightnessAroundPoint);
+            }
+
+            final boolean useBlack = brightnessAroundPoint > BRIGHTNESS_BEFORE_BLACK;
+
+            if (useBlack) {
                 mPaint.setColor(Color.BLACK);
-                mPaint.setStrokeWidth(4f);
+                mPaint.setStrokeWidth(BLACK_STROKE_WIDTH);
             } else {
+                mPaint.setStrokeWidth(DEFAULT_STROKE_WIDTH);
                 mPaint.setARGB(
                         PAINT_ALPHA + mAlphaOffset,
                         160 + rnd.nextInt(96),
