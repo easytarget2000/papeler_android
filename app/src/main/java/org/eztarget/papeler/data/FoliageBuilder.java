@@ -48,8 +48,9 @@ public class FoliageBuilder implements BeingBuilder {
         final Foliage foliage = new Foliage(mCanvasSize);
         foliage.setSymmetric(mSymmetric);
         foliage.setRectMode(mPaintMode);
-        switch (random.nextInt(6)) {
+        switch (random.nextInt(5)) {
             case 0:
+            case 1:
                 foliage.initPolygon(x, y);
                 break;
 

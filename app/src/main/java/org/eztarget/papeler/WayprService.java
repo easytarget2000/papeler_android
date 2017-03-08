@@ -37,11 +37,11 @@ public class WayprService extends WallpaperService {
 
     private static final float BLACK_STROKE_WIDTH = 3f;
 
-    private static final float BRIGHTNESS_BEFORE_BLACK = 0.3f;
+    private static final float BRIGHTNESS_BEFORE_BLACK = 0.25f;
 
     private static final int BRIGHTNESS_SAMPLE_SIZE = 128;
 
-    private static final boolean VERBOSE = false;
+    private static final boolean VERBOSE = BuildConfig.DEBUG && false;
 
     @Override
     public Engine onCreateEngine() {

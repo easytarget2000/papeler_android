@@ -237,7 +237,7 @@ class Foliage extends Being {
 
         final int numberOfEdges = mRandom.nextInt(5) + 3;
         final int nodesPerEdge = NUM_OF_INITIAL_NODES / numberOfEdges;
-        final double size = mCanvasSize / 5.0;
+        final double size = random(mCanvasSize / 8.0);
 
         final double polygonAngle = random(TWO_PI);
 
