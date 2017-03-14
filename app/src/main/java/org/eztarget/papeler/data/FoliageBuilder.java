@@ -18,18 +18,21 @@ public class FoliageBuilder implements BeingBuilder {
 
     private int mPaintMode;
 
-    public FoliageBuilder(final float canvasSize) {
+    private boolean mCanChangeAlpha = true;
+
+    public FoliageBuilder(final float canvasSize, final boolean canChangeAlpha) {
         final Random random = new Random();
 
-        this.mCanvasSize = canvasSize;
-        this.mSymmetric = random.nextInt(3) % 3 == 0;
+        mCanvasSize = canvasSize;
+        mSymmetric = random.nextInt(3) % 3 == 0;
+        mCanChangeAlpha = canChangeAlpha;
 //        if (this.mSymmetric) {
 //            this.mPaintMode = (random.nextInt(2) % 2 == 0) ? Foliage.LINE_MODE : Foliage.CIRCLE_MODE;
 //        } else {
         if (random.nextBoolean()) {
-            this.mPaintMode = Foliage.LINE_MODE;
+            mPaintMode = Foliage.LINE_MODE;
         } else {
-            this.mPaintMode = random.nextInt(4);
+            mPaintMode = random.nextInt(4);
         }
 //        }
 
@@ -45,7 +48,7 @@ public class FoliageBuilder implements BeingBuilder {
     public Being build(final float x, final float y) {
         final Random random = new Random();
 
-        final Foliage foliage = new Foliage(mCanvasSize);
+        final Foliage foliage = new Foliage(mCanvasSize, mCanChangeAlpha);
         foliage.setSymmetric(mSymmetric);
         foliage.setRectMode(mPaintMode);
         switch (random.nextInt(5)) {

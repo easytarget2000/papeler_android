@@ -1,5 +1,6 @@
 package org.eztarget.papeler;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -93,6 +94,8 @@ public class WayprService extends WallpaperService {
 
         private Canvas mCanvas;
 
+        private boolean mHasBackgroundImage;
+
         WayprEngine() {
 
             if (VERBOSE) {
@@ -117,7 +120,9 @@ public class WayprService extends WallpaperService {
 
             nextStep();
 
-            if (PreferenceAccess.with(getApplicationContext()).getAndUnsetIsFirstTime()) {
+            final PreferenceAccess preferences = PreferenceAccess.with(getApplicationContext());
+
+            if (preferences.getAndUnsetIsFirstTime()) {
                 final String welcomeMessage = getString(R.string.main_welcome_msg);
                 Toast.makeText(WayprService.this, welcomeMessage, Toast.LENGTH_LONG).show();
 
@@ -134,6 +139,14 @@ public class WayprService extends WallpaperService {
                         },
                         3000L
                 );
+            }
+
+            final boolean hasBackgroundImageNow = preferences.hasBackgroundImage();
+            final boolean hasNewBackgroundImage = preferences.hasNewBackgroundImage();
+
+            if (hasBackgroundImageNow != mHasBackgroundImage || hasNewBackgroundImage) {
+                mHasBackgroundImage = hasBackgroundImageNow;
+                initCanvas();
             }
         }
 
@@ -154,9 +167,9 @@ public class WayprService extends WallpaperService {
             mWidth = width;
             mHeight = height;
 
-            mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
-            mCanvas = new Canvas(mBitmap);
-            mCanvas.drawColor(mBackgroundColor);
+            final Context context = getApplicationContext();
+            mHasBackgroundImage = PreferenceAccess.with(context).hasBackgroundImage();
+            initCanvas();
 
             mPaint.setStyle(Paint.Style.STROKE);
 //            if (new Random().nextInt(7) > 4) {
@@ -170,7 +183,8 @@ public class WayprService extends WallpaperService {
                     mBeingBuilder = new FlowerStickBuilder(mHeight);
                     break;
                 default:
-                    mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight));
+                    final boolean canChangeAlpha = !mHasBackgroundImage;
+                    mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), canChangeAlpha);
             }
 
             if (mBeings != null) {
@@ -190,6 +204,40 @@ public class WayprService extends WallpaperService {
             super.onSurfaceChanged(holder, format, mWidth, mHeight);
         }
 
+        private void initCanvas() {
+            final Context context = getApplicationContext();
+            if (mHasBackgroundImage) {
+
+                final Bitmap storedBitmap;
+                try {
+                    storedBitmap = BackgroundImageOpener.loadRatioPreserved(mWidth, mHeight);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+
+                    PreferenceAccess.with(context).setHasBackgroundImage(false);
+                    initEmtpyCanvas();
+                    return;
+                }
+
+                mBitmap = storedBitmap.copy(Bitmap.Config.ARGB_8888, true);
+                mCanvas = new Canvas(mBitmap);
+
+                PreferenceAccess.with(context).acknowledgeNewBackgroundImage();
+
+            } else {
+                initEmtpyCanvas();
+            }
+        }
+
+        private void initEmtpyCanvas() {
+            mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+            mCanvas = new Canvas(mBitmap);
+            mCanvas.drawColor(mBackgroundColor);
+            mHasBackgroundImage = false;
+        }
+
         @Override
         public void onTouchEvent(MotionEvent event) {
 
@@ -200,7 +248,7 @@ public class WayprService extends WallpaperService {
                 }
 
                 addBeing(event.getX(), event.getY());
-                adjustPaint((int) event.getX(),(int) event.getY());
+                adjustPaint((int) event.getX(), (int) event.getY());
 
                 mResetCanvasOnce = false;
                 nextStep();
@@ -337,15 +385,28 @@ public class WayprService extends WallpaperService {
                 mAlphaOffset *= 0.5f;
             }
 
+            if (mHasBackgroundImage) {
+                mPaint.setColor(mBitmap.getPixel(x, y));
+                mPaint.setAlpha(64);
+                return;
+            }
+
             final Random rnd = new Random();
 
-            final int maxSampleDistance = mBitmap.getWidth() / 5;
+            final int bitmapWidth = mBitmap.getWidth();
+            final int bitmapHeight = mBitmap.getHeight();
+
+            final int maxSampleDistance = Math.min(bitmapWidth, bitmapHeight) / 5;
             final int maxSampleDistanceHalf = maxSampleDistance / 2;
+
             double brightnessAroundPoint = 0;
             for (int i = 0; i < BRIGHTNESS_SAMPLE_SIZE; i++) {
+                final int randomX = x - maxSampleDistanceHalf + rnd.nextInt(maxSampleDistance);
+                final int randomY = y - maxSampleDistanceHalf + rnd.nextInt(maxSampleDistance);
+
                 final int colorAtRandomPoint = mBitmap.getPixel(
-                        x - maxSampleDistanceHalf + rnd.nextInt(maxSampleDistance),
-                        y - maxSampleDistanceHalf + rnd.nextInt(maxSampleDistance)
+                        (randomX > 0 && randomX < bitmapWidth) ? randomX : 0,
+                        (randomY > 0 && randomY < bitmapHeight) ? randomY : 0
                 );
 
                 float hsvAtRandomPoint[] = new float[3];

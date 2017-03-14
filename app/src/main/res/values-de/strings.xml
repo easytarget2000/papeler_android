@@ -4,4 +4,17 @@
 
     <string name="main_welcome_msg_2">Drehe dein Gerät, um die Zeichnungen zurückzusetzen.</string>
 
+    <string name="prefs_gallery_button">Bilder durchsuchen</string>
+
+    <string name="prefs_remove_img_button">Bild entfernen</string>
+
+    <string name="prefs_new_img_msg">Neues Bild ausgewählt.</string>
+
+    <string name="prefs_img_del_msg">Bild entfernt.</string>
+
+    <string name="prefs_file_access_message">
+        Um ein Hintergrundbild auszuwählen,
+        erlaube Waypr deine Dateien öffnen und kopieren zu können.
+    </string>
+
 </resources>

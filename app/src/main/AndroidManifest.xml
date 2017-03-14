@@ -2,6 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.eztarget.papeler">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <uses-feature
         android:name="android.software.live_wallpaper"
         android:required="true" />
@@ -40,11 +43,10 @@
             </intent-filter>
         </activity>
 
-        <!--<activity-->
-        <!--android:name=".MyPreferencesActivity"-->
-        <!--android:exported="true"-->
-        <!--android:label="@string/app_name"-->
-        <!--android:theme="@android:style/Theme.Light.WallpaperSettings" />-->
+        <activity
+            android:name=".MyPreferencesActivity"
+            android:exported="true"
+            android:label="@string/app_name" />
 
     </application>
 

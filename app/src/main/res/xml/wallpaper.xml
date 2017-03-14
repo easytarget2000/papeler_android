@@ -2,4 +2,5 @@
 <wallpaper
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:label="@string/app_name"
+    android:settingsActivity="org.eztarget.papeler.MyPreferencesActivity"
     android:thumbnail="@mipmap/ic_launcher" />

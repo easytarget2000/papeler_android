@@ -23,14 +23,14 @@ public class PreferenceAccess {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public static PreferenceAccess with(@NonNull Context context) {
+    static PreferenceAccess with(@NonNull Context context) {
         if (instance == null) {
             instance = new PreferenceAccess(context);
         }
         return instance;
     }
 
-    public boolean getAndUnsetIsFirstTime() {
+    boolean getAndUnsetIsFirstTime() {
         final boolean openedBefore = mPrefs.getBoolean("OPENED", false);
         if (!openedBefore) {
             edit("OPENED", true);
@@ -38,9 +38,38 @@ public class PreferenceAccess {
         return !openedBefore;
     }
 
+    void setHasBackgroundImage(final boolean hasNewImage) {
+        edit("HAS_IMAGE", hasNewImage);
+        if (hasNewImage) {
+            queueNewBackgroundImage();
+        }
+    }
+
+    boolean hasBackgroundImage() {
+        return mPrefs.getBoolean("HAS_IMAGE", false);
+    }
+
+    void acknowledgeNewBackgroundImage() {
+        edit("NEW_IMAGE", false);
+    }
+
+    void queueNewBackgroundImage() {
+        edit("NEW_IMAGE", true);
+    }
+
+    boolean hasNewBackgroundImage() {
+        return mPrefs.getBoolean("NEW_IMAGE", true);
+    }
+
     private void edit(final String key, final boolean value) {
         final SharedPreferences.Editor editor = mPrefs.edit();
         editor.putBoolean(key, value);
+        editor.apply();
+    }
+
+    private void edit(final String key, final String value) {
+        final SharedPreferences.Editor editor = mPrefs.edit();
+        editor.putString(key, value);
         editor.apply();
     }
 }

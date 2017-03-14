@@ -6,4 +6,17 @@
 
     <string name="main_welcome_msg_2">Rotate your device to reset the drawings.</string>
 
+    <string name="prefs_gallery_button">Browse images</string>
+
+    <string name="prefs_remove_img_button">Remove image</string>
+
+    <string name="prefs_new_img_msg">New image selected.</string>
+
+    <string name="prefs_img_del_msg">Image removed.</string>
+
+    <string name="prefs_file_access_message">
+        Please allow Waypr to open and copy files on your device,
+        in order to select a background image.
+    </string>
+
 </resources>

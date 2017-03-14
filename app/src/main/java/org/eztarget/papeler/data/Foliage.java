@@ -32,6 +32,8 @@ class Foliage extends Being {
 
     private int mPaintMode;
 
+    private boolean mChangeAlpha = true;
+
     private double mNodeDensity;
 
     private double mNodeRadius;
@@ -44,7 +46,7 @@ class Foliage extends Being {
 
     private double mMaxPushDistance;
 
-    Foliage(final double canvasSize) {
+    Foliage(final double canvasSize, final boolean canChangeAlpha) {
         mCanvasSize = canvasSize;
         final double nodeSize = canvasSize / 300f;
         mNodeRadius = nodeSize * 0.5f;
@@ -52,6 +54,7 @@ class Foliage extends Being {
         mNeighbourGravity = mNodeRadius * 0.5f;
         mMaxPushDistance = canvasSize * 0.1f;
         mJitter = mCanvasSize * 0.001f;
+        mChangeAlpha = canChangeAlpha;
 
         Log.d(
                 TAG,
@@ -254,12 +257,9 @@ class Foliage extends Being {
             final double edge2X = x + (size * Math.cos(angleOfEdge2));
             final double edge2Y = y + (size * Math.sin(angleOfEdge2));
 
-//            Log.d(TAG, "Edge 1: " + edge1X + ", " + edge1Y);
-//            Log.d(TAG, "Edge 2: " + edge2X + ", " + edge2Y);
-
             final double angleBetweenEdges = angle(edge1X, edge1Y, edge2X, edge2Y);
-            final double nodeRelativeToEdge1 = (i  - (edge * (double) nodesPerEdge)) / (double) nodesPerEdge;
-//            Log.d(TAG, "i: " + i + ", edge: " + edge + ", angleBetweenEdges: " + angleBetweenEdges + ", nodeRelativeToEdge1: " + nodeRelativeToEdge1);
+            final double nodeRelativeToEdge1;
+            nodeRelativeToEdge1 = (i  - (edge * (double) nodesPerEdge)) / (double) nodesPerEdge;
 
             final Node node = new Node();
             node.mX = edge1X + (Math.cos(angleBetweenEdges) * nodeRelativeToEdge1 * size);
@@ -331,7 +331,9 @@ class Foliage extends Being {
 
             switch (mPaintMode) {
                 case RECT_MODE:
-                    paint.setAlpha(32);
+                    if (mChangeAlpha) {
+                        paint.setAlpha(32);
+                    }
                     canvas.drawRect(
                             (float) node1.mX,
                             (float) node1.mY,
@@ -349,7 +351,9 @@ class Foliage extends Being {
                     break;
 
                 default:
-                    paint.setAlpha(32);
+                    if (mChangeAlpha) {
+                        paint.setAlpha(32);
+                    }
 
                     canvas.drawPoint((float) node1.mX, (float) node1.mY, paint);
                     canvas.drawPoint((float) node1.mX, (float) node1.mY + 1, paint);
@@ -376,18 +380,11 @@ class Foliage extends Being {
                             paint
                     );
                     break;
-//                case CIRCLE_MODE:
-//                    paint.setAlpha(16);
-//                    canvas.drawCircle(
-//                            node1.mX,
-//                            node1.mY,
-//                            random(mNodeRadius * 8f),
-//                            paint
-//                    );
-//                    break;
 
                 default:
-                    paint.setAlpha(40);
+                    if (mChangeAlpha) {
+                        paint.setAlpha(40);
+                    }
 
                     canvas.drawLine(
                             (float) node1.mX,

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000">
+
+    <ImageView
+        android:id="@+id/image_prefs_bg"
+        android:layout_width="match_parent"
+        android:scaleType="centerCrop"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:id="@+id/button_prefs_delete_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:enabled="false"
+        android:minWidth="192dp"
+        android:onClick="onRemoveImageButtonClick"
+        android:text="@string/prefs_remove_img_button" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/button_prefs_delete_img"
+        android:layout_centerHorizontal="true"
+        android:minWidth="192dp"
+        android:onClick="onGalleryButtonClick"
+        android:text="@string/prefs_gallery_button" />
+
+    <ProgressBar
+        android:id="@+id/progress_prefs"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:indeterminate="true"
+        android:max="100"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>
