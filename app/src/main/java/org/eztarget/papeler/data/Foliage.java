@@ -1,7 +1,6 @@
 package org.eztarget.papeler.data;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -20,6 +19,8 @@ class Foliage extends Being {
 
     private Node mFirstNode;
 
+    private int mNumberOfNodes;
+
     private double mCanvasSize;
 
     private boolean mSymmetric;
@@ -28,7 +29,7 @@ class Foliage extends Being {
 
     static final int RECT_MODE = 1;
 
-    static final int CIRCLE_MODE = 2;
+//    static final int FLARE_MODE = 2;
 
     private int mPaintMode;
 
@@ -46,6 +47,8 @@ class Foliage extends Being {
 
     private double mMaxPushDistance;
 
+    private NewNode mSpecialNode;
+
     Foliage(final double canvasSize, final boolean canChangeAlpha) {
         mCanvasSize = canvasSize;
         final double nodeSize = canvasSize / 300f;
@@ -53,8 +56,10 @@ class Foliage extends Being {
         mNodeDensity = 10 + mRandom.nextInt(30);
         mNeighbourGravity = mNodeRadius * 0.5f;
         mMaxPushDistance = canvasSize * 0.1f;
-        mJitter = mCanvasSize * 0.001f;
+        mJitter = mCanvasSize * 0.002f;
         mChangeAlpha = canChangeAlpha;
+
+        mNumberOfNodes = NUM_OF_INITIAL_NODES;
 
         Log.d(
                 TAG,
@@ -68,8 +73,11 @@ class Foliage extends Being {
         mSymmetric = symmetric;
     }
 
-    void setRectMode(final int rectMode) {
-        mPaintMode = rectMode;
+    void setRectMode(final int paintMode) {
+        mPaintMode = paintMode;
+//        if (mPaintMode == FLARE_MODE) {
+//            mJitter *= 3;
+//        }
     }
 
     Foliage initSquare(final float x, final float y) {
@@ -85,14 +93,18 @@ class Foliage extends Being {
             final Node node = new Node();
 
             if (i < quarterOfInitialNodes) {
-                node.mX = (x - sideLengthHalf) + (sideLength * ((double) i / quarterOfInitialNodes));
+                node.mX = (x - sideLengthHalf)
+                        + (sideLength * ((double) i / quarterOfInitialNodes));
                 node.mY = y - sideLengthHalf;
             } else if (i < quarterOfInitialNodes * 2) {
                 node.mX = x + sideLengthHalf;
                 node.mY = (y - sideLengthHalf)
-                        + (sideLength * (((double) i - quarterOfInitialNodes) / quarterOfInitialNodes));
+                        + (sideLength *
+                        (((double) i - quarterOfInitialNodes) / quarterOfInitialNodes));
             } else if (i < quarterOfInitialNodes * 3) {
-                node.mX = (x + sideLengthHalf) - (sideLength * (((double) i - (quarterOfInitialNodes * 2)) / quarterOfInitialNodes));
+                node.mX = (x + sideLengthHalf)
+                        - (sideLength *
+                        (((double) i - (quarterOfInitialNodes * 2)) / quarterOfInitialNodes));
                 node.mY = y + sideLengthHalf;
             } else {
                 node.mX = x - sideLengthHalf;
@@ -167,6 +179,8 @@ class Foliage extends Being {
             arcEnd = arcStart + random(Math.PI);
         }
 
+        initSpecialNode(x, y);
+
         final double squeezeFactor = random(0.66) + 0.66;
 
         Log.d(TAG, "initCircle(): From " + arcStart + " to " + arcEnd + ", radius: " + initialRadius);
@@ -210,7 +224,7 @@ class Foliage extends Being {
         final float lineCos = (float) Math.cos(lineAngle);
         final float lineSin = (float) Math.sin(lineAngle);
 
-        Log.d("Foliage()", "Line init. Node density: " + mNodeDensity);
+        Log.d("Foliage()", "Line init. Line density: " + mNodeDensity);
 
         Node lastNode = null;
         for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
@@ -243,6 +257,8 @@ class Foliage extends Being {
         final double size = random(mCanvasSize / 8.0);
 
         final double polygonAngle = random(TWO_PI);
+
+        initSpecialNode(x, y);
 
         Node lastNode = null;
         for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
@@ -283,6 +299,10 @@ class Foliage extends Being {
         return this;
     }
 
+    private void initSpecialNode(final double x, final double y) {
+        mSpecialNode = new NewNode(x, y);
+    }
+
     @Override
     public void draw(@NonNull Canvas canvas, @NonNull Paint paint) {
         Node currentNode = mFirstNode;
@@ -307,17 +327,7 @@ class Foliage extends Being {
             @NonNull Node node1,
             @NonNull Node node2
     ) {
-        paint.setColor(
-                Color.argb(255, mRandom.nextInt(256), mRandom.nextInt(256), mRandom.nextInt(256))
-        );
 
-        canvas.drawLine(
-                (float) node1.mX,
-                (float) node1.mY,
-                (float) node2.mX,
-                (float) node2.mY,
-                paint
-        );
     }
 
     private void draw(
@@ -372,6 +382,9 @@ class Foliage extends Being {
 
             switch (mPaintMode) {
                 case RECT_MODE:
+                    if (mChangeAlpha) {
+                        paint.setAlpha(32);
+                    }
                     canvas.drawRect(
                             (float) node1.mX,
                             (float) node1.mY,
@@ -380,6 +393,17 @@ class Foliage extends Being {
                             paint
                     );
                     break;
+
+//                case FLARE_MODE:
+//                    paint.setAlpha(3);
+//                    canvas.drawLine(
+//                            (float) node1.mX,
+//                            (float) node1.mY,
+//                            (float) mSpecialNode.mX,
+//                            (float) mSpecialNode.mY,
+//                            paint
+//                    );
+//                    break;
 
                 default:
                     if (mChangeAlpha) {
@@ -420,6 +444,8 @@ class Foliage extends Being {
             currentNode = currentNode.mNext;
         } while (!mStopped && currentNode != mFirstNode);
 
+        mSpecialNode.update(!isTouching);
+
         return mAge < MAX_AGE;
     }
 
@@ -438,51 +464,39 @@ class Foliage extends Being {
         newNeighbour.mNext = oldNeighbour;
     }
 
-    private static double angle(
-            final double x1,
-            final double y1,
-            final double x2,
-            final double y2
-    ) {
-        final double calcAngle = Math.atan2(
-                -(y1 - y2),
-                x2 - x1
-        );
 
-        if (calcAngle < 0) {
-            return calcAngle + TWO_PI;
-        } else {
-            return calcAngle;
-        }
-    }
 
     private class Node {
 
-        private Node mNext;
+        protected Node mNext;
 
-        private double mX;
+        protected double mX;
 
-        private double mY;
+        protected double mY;
 
-        private Node() {
+        protected Node() {
+
+        }
+
+        protected Node(final double x, final double y) {
+            mX = x;
+            mY = y;
         }
 
         @Override
         public String toString() {
-            return "[Node " + super.toString() + " at " + mX + ", " + mY + "]";
+            return "[Line " + super.toString() + " at " + mX + ", " + mY + "]";
         }
 
         private double distance(final Node otherNode) {
-            return Math.sqrt(
-                    Math.pow((otherNode.mX - mX), 2) + Math.pow((otherNode.mY - mY), 2)
-            );
+            return Foliage.distance(mX, mY, otherNode.mX, otherNode.mY);
         }
 
         private double angle(final Node otherNode) {
             return Foliage.angle(mX, mY, otherNode.mX, otherNode.mY);
         }
 
-        private void update(final boolean applyForces) {
+        protected void update(final boolean applyForces) {
 
             mX += getJitterValue();
             mY += getJitterValue();
@@ -491,7 +505,15 @@ class Foliage extends Being {
                 return;
             }
 
+            updateAcceleration();
+
+        }
+
+        protected void updateAcceleration() {
             Node otherNode = mNext;
+
+            double force = 0;
+            double angle = 0;
 
             do {
 
@@ -506,24 +528,27 @@ class Foliage extends Being {
                     continue;
                 }
 
-                final double angle = angle(otherNode);
+                angle = angle(otherNode) + (angle * 0.05);
 
-                final double force;
+                force *= 0.05;
+
                 if (otherNode == mNext) {
 
                     if (distance > mPreferredNeighbourDistance) {
-                        force = mPreferredNeighbourDistanceHalf;
+//                        force = mPreferredNeighbourDistanceHalf;
+                        force += (distance / PUSH_FORCE);
                     } else {
-                        force = -mNeighbourGravity;
+                        force -= mNeighbourGravity;
                     }
 
                 } else {
 
                     if (distance < mNodeRadius) {
-                        force = -mNodeRadius;
+                        force -= mNodeRadius;
                     } else {
-                        force = -PUSH_FORCE / distance;
+                        force -= (PUSH_FORCE / distance);
                     }
+
                 }
 
                 mX += Math.cos(angle) * force;
@@ -533,6 +558,23 @@ class Foliage extends Being {
             } while (!mStopped);
         }
 
+    }
+
+    private class NewNode extends Node {
+
+        private NewNode(final double x, final double y) {
+            mX = x;
+            mY = y;
+
+//            mAccelerationScale = mCanvasSize * 0.01 * mRandom.nextDouble();
+//            mAccelerationAngle = mRandom.nextDouble() * TWO_PI;
+        }
+
+        @Override
+        protected void updateAcceleration() {
+            mX *= 0.9;
+            mY += mCanvasSize * 0.01;
+        }
     }
 
 }

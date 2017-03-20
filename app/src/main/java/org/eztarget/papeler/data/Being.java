@@ -29,4 +29,33 @@ public abstract class Being implements UpdateAndDrawable {
     protected double random(final double maxValue) {
         return mRandom.nextDouble() * maxValue;
     }
+
+    protected static double angle(
+            final double x1,
+            final double y1,
+            final double x2,
+            final double y2
+    ) {
+        final double calcAngle = Math.atan2(
+                -(y1 - y2),
+                x2 - x1
+        );
+
+        if (calcAngle < 0) {
+            return calcAngle + TWO_PI;
+        } else {
+            return calcAngle;
+        }
+    }
+
+    protected static double distance(
+            final double x1,
+            final double y1,
+            final double x2,
+            final double y2
+    ) {
+        return Math.sqrt(
+                Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2)
+        );
+    }
 }
