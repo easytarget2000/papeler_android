@@ -56,7 +56,7 @@ class Foliage extends Being {
         mNodeDensity = 10 + mRandom.nextInt(30);
         mNeighbourGravity = mNodeRadius * 0.5f;
         mMaxPushDistance = canvasSize * 0.1f;
-        mJitter = mCanvasSize * 0.002f;
+        mDoubleJitter = mCanvasSize * 0.002f;
         mChangeAlpha = canChangeAlpha;
 
         mNumberOfNodes = NUM_OF_INITIAL_NODES;
@@ -76,7 +76,7 @@ class Foliage extends Being {
     void setRectMode(final int paintMode) {
         mPaintMode = paintMode;
 //        if (mPaintMode == FLARE_MODE) {
-//            mJitter *= 3;
+//            mDoubleJitter *= 3;
 //        }
     }
 
@@ -146,7 +146,7 @@ class Foliage extends Being {
             node.mX = x + (lineLength * ((i + 1.0) / NUM_OF_INITIAL_NODES));
 
             final double angleOfNode = TWO_PI * ((i + 1.0) / NUM_OF_INITIAL_NODES);
-            node.mY = y + getJitterValue() + (Math.sin(angleOfNode) * lineSinHeight);
+            node.mY = y + getDoubleJitter() + (Math.sin(angleOfNode) * lineSinHeight);
 
             if (mFirstNode == null) {
                 mFirstNode = node;
@@ -193,10 +193,10 @@ class Foliage extends Being {
 
             node.mX = x
                     + (((float) Math.cos(angleOfNode) * initialRadius) * squeezeFactor)
-                    + getJitterValue();
+                    + getDoubleJitter();
             node.mY = y
                     + ((float) Math.sin(angleOfNode) * initialRadius)
-                    + getJitterValue();
+                    + getDoubleJitter();
 
             if (mFirstNode == null) {
                 mFirstNode = node;
@@ -498,8 +498,8 @@ class Foliage extends Being {
 
         protected void update(final boolean applyForces) {
 
-            mX += getJitterValue();
-            mY += getJitterValue();
+            mX += getDoubleJitter();
+            mY += getDoubleJitter();
 
             if (!applyForces) {
                 return;

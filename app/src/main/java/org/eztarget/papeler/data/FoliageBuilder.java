@@ -61,9 +61,8 @@ public class FoliageBuilder implements BeingBuilder {
                 foliage.initCircle(x, y);
         }
 
-        final LineArtist lineArtist = new LineArtist(x, y, mCanvasSize);
-
-        return lineArtist;
+        final SwingBrush swingBrush = new SwingBrush(x, y, mCanvasSize);
+        return swingBrush;
 
 
 //        Log.d(TAG, "Built Foliage at " + x + ", " + y + ".");

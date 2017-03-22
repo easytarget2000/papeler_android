@@ -48,7 +48,7 @@ class FoliageLines extends Being {
         mNodeDensity = 10 + mRandom.nextInt(30);
         mNeighbourGravity = mNodeRadius * 0.5f;
         mMaxPushDistance = canvasSize * 0.1f;
-        mJitter = mCanvasSize * 0.002f;
+        mDoubleJitter = mCanvasSize * 0.002f;
         mChangeAlpha = canChangeAlpha;
 
         mNumberOfNodes = NUM_OF_INITIAL_NODES;
@@ -131,10 +131,10 @@ class FoliageLines extends Being {
 
             final double lineX = x
                     + (((float) Math.cos(angleOfNode) * initialRadius) * squeezeFactor)
-                    + getJitterValue();
+                    + getDoubleJitter();
             final double lineY = y
                     + ((float) Math.sin(angleOfNode) * initialRadius)
-                    + getJitterValue();
+                    + getDoubleJitter();
 
             final Line line = new Line(lineX, lineY, lineLength, TWO_PI / 4);
 
@@ -313,8 +313,8 @@ class FoliageLines extends Being {
         private void update(final boolean applyForces) {
 
             for (int i = 0; i < 2; i++) {
-                mX[i] += getJitterValue();
-                mY[i] += getJitterValue();
+                mX[i] += getDoubleJitter();
+                mY[i] += getDoubleJitter();
             }
 
             if (!applyForces) {

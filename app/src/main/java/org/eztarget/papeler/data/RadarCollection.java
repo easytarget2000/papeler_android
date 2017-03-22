@@ -11,22 +11,21 @@ import static android.content.ContentValues.TAG;
  * Created by michelsievers on 20/03/2017.
  */
 
-public class LineArtist extends Being {
+public class RadarCollection extends Being {
 
     private static final int MAX_AGE = 5;
 
     private int mAge = 0;
 
-    private Line[] mLines;
+    private Radar[] mRadars;
 
-    public LineArtist(final double x, final double y, final double canvasSize) {
-        mLines = new Line[1 + mRandom.nextInt(10)];
-        mLines = new Line[1];
+    public RadarCollection(final double x, final double y, final double canvasSize) {
+        mRadars = new Radar[1 + mRandom.nextInt(10)];
 
-        for (int i = 0; i < mLines.length; i++) {
-            mLines[i] = new Line(x, y, random(canvasSize * 0.4) + 64, TWO_PI / 4.0);
+        for (int i = 0; i < mRadars.length; i++) {
+            mRadars[i] = new Radar(x, y, random(canvasSize * 0.4) + 64, random(TWO_PI));
         }
-        mJitter = canvasSize * 0.01;
+        mDoubleJitter = canvasSize * 0.01;
     }
 
     @Override
@@ -34,8 +33,8 @@ public class LineArtist extends Being {
 
 //        mLine.update();
         boolean updatedOne = false;
-        for (final Line line : mLines) {
-            updatedOne |= line.update();
+        for (final Radar radar : mRadars) {
+            updatedOne |= radar.update();
         }
         return updatedOne;
     }
@@ -43,19 +42,19 @@ public class LineArtist extends Being {
     @Override
     public void draw(@NonNull Canvas canvas, @NonNull Paint paint1) {
 //        paint1.setAlpha(50);
-        for (final Line line : mLines) {
+        for (final Radar radar : mRadars) {
             canvas.drawLine(
-                    line.getStartX(),
-                    line.getStartY(),
-                    line.getEndX(),
-                    line.getEndY(),
+                    radar.getStartX(),
+                    radar.getStartY(),
+                    radar.getEndX(),
+                    radar.getEndY(),
                     paint1
             );
         }
 
     }
 
-    private class Line {
+    private class Radar {
 
         private double mCenterX;
 
@@ -85,7 +84,7 @@ public class LineArtist extends Being {
 
         private int mMaxAge;
 
-        private Line(final double x, final double y, final double radius, final double angle) {
+        private Radar(final double x, final double y, final double radius, final double angle) {
 
 
             mCenterX = x;
@@ -96,7 +95,6 @@ public class LineArtist extends Being {
             mCurrentLength = mInitialLength;
 
             mMaxAge = mRandom.nextInt(1000) + 100;
-            mMaxAge = 200;
 
             mInitialAngle = angle;
             mAngleStep = TWO_PI / (double) mMaxAge;
@@ -110,7 +108,7 @@ public class LineArtist extends Being {
 
         @Override
         public String toString() {
-            return "[LineArtist.Line around " + mCenterX + ", " + mCenterY
+            return "[RadarCollection.Radar around " + mCenterX + ", " + mCenterY
                     + ", radius " + mRadius + "]";
         }
 
@@ -137,7 +135,7 @@ public class LineArtist extends Being {
 
         private boolean update() {
 //
-//            for (final Line otherLine : mLines) {
+//            for (final Radar otherLine : mRadars) {
 //                if (otherLine == this) {
 //                    continue;
 //                }
@@ -149,10 +147,10 @@ public class LineArtist extends Being {
 //            }
 
             if (mAge > mMaxAge * 0.9) {
-                mCurrentLength = mInitialLength + ((mInitialLength - mCurrentLength) / 8);
+                mCurrentLength = mInitialLength + ((mInitialLength - mCurrentLength) / 10);
             }
 
-            mCurrentLength += getJitterValue();
+            mCurrentLength += getDoubleJitter();
             if (mCurrentLength < 0) {
                 mCurrentLength = 4;
             } else if (mCurrentLength > mRadius) {
@@ -162,8 +160,8 @@ public class LineArtist extends Being {
             mCurrentAngle = mInitialAngle + (mAge++ * mAngleStep);
 //            mCurrentAngle += ((double) mMaxAge / ++mAge) / 10.0;
 
-//            mCenterX += getJitterValue();
-//            mCenterY += getJitterValue();
+//            mCenterX += getDoubleJitter();
+//            mCenterY += getDoubleJitter();
 
             return mAge <= mMaxAge;
         }

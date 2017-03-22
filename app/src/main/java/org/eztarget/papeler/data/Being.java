@@ -14,7 +14,9 @@ public abstract class Being implements UpdateAndDrawable {
 
     protected int mAge = 0;
 
-    protected double mJitter;
+    protected double mDoubleJitter;
+
+    protected float mFloatJitter;
 
     protected Random mRandom = new Random();
 
@@ -22,12 +24,20 @@ public abstract class Being implements UpdateAndDrawable {
         mStopped = true;
     }
 
-    protected double getJitterValue() {
-        return mJitter * 0.5 - random(mJitter);
+    protected double getDoubleJitter() {
+        return mDoubleJitter * 0.5 - random(mDoubleJitter);
+    }
+
+    protected float getFloatJitter() {
+        return mFloatJitter * 0.5f - randomF(mFloatJitter);
     }
 
     protected double random(final double maxValue) {
         return mRandom.nextDouble() * maxValue;
+    }
+
+    protected float randomF(final float maxValue) {
+        return mRandom.nextFloat() * maxValue;
     }
 
     protected static double angle(

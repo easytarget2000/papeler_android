@@ -31,12 +31,12 @@ class FlowerStick extends Being {
 
     FlowerStick(final double canvasHeight, final double x, final double y) {
         mCanvasHeight = canvasHeight;
-        mJitter = mCanvasHeight * 0.001f;
+        mDoubleJitter = mCanvasHeight * 0.001f;
         mBlossomX = x;
         mBlossomY = y;
         mLastLineX = (float) mBlossomX;
         mLastLineY = (float) mCanvasHeight;
-        mJitter = 3f;
+        mDoubleJitter = 3f;
         mLinePaint.setAntiAlias(true);
         mLinePaint.setColor(Color.WHITE);
     }
@@ -85,7 +85,7 @@ class FlowerStick extends Being {
             return;
 
         } else {
-            final float newLineX = (float) (mBlossomX + getJitterValue());
+            final float newLineX = (float) (mBlossomX + getDoubleJitter());
             mLinePaint.setAlpha(paint.getAlpha());
             canvas.drawLine(
                     mLastLineX,
