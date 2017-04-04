@@ -27,7 +27,7 @@ class Foliage extends Being {
 
     static final int LINE_MODE = 0;
 
-    static final int RECT_MODE = 1;
+//    static final int RECT_MODE = 1;
 
 //    static final int FLARE_MODE = 2;
 
@@ -47,7 +47,7 @@ class Foliage extends Being {
 
     private double mMaxPushDistance;
 
-    private NewNode mSpecialNode;
+//    private NewNode mSpecialNode;
 
     Foliage(final double canvasSize, final boolean canChangeAlpha) {
         mCanvasSize = canvasSize;
@@ -275,7 +275,7 @@ class Foliage extends Being {
 
             final double angleBetweenEdges = angle(edge1X, edge1Y, edge2X, edge2Y);
             final double nodeRelativeToEdge1;
-            nodeRelativeToEdge1 = (i  - (edge * (double) nodesPerEdge)) / (double) nodesPerEdge;
+            nodeRelativeToEdge1 = (i - (edge * (double) nodesPerEdge)) / (double) nodesPerEdge;
 
             final Node node = new Node();
             node.mX = edge1X + (Math.cos(angleBetweenEdges) * nodeRelativeToEdge1 * size);
@@ -300,7 +300,7 @@ class Foliage extends Being {
     }
 
     private void initSpecialNode(final double x, final double y) {
-        mSpecialNode = new NewNode(x, y);
+//        mSpecialNode = new NewNode(x, y);
     }
 
     @Override
@@ -339,61 +339,61 @@ class Foliage extends Being {
 
         if (mSymmetric) {
 
-            switch (mPaintMode) {
-                case RECT_MODE:
-                    if (mChangeAlpha) {
-                        paint.setAlpha(32);
-                    }
-                    canvas.drawRect(
-                            (float) node1.mX,
-                            (float) node1.mY,
-                            (float) node2.mX,
-                            (float) node2.mY,
-                            paint
-                    );
-                    canvas.drawRect(
-                            (float) (mCanvasSize - node1.mX),
-                            (float) node1.mY,
-                            (float) (mCanvasSize - node2.mX),
-                            (float) node2.mY,
-                            paint
-                    );
-                    break;
-
-                default:
-                    if (mChangeAlpha) {
-                        paint.setAlpha(32);
-                    }
-
-                    canvas.drawPoint((float) node1.mX, (float) node1.mY, paint);
-                    canvas.drawPoint((float) node1.mX, (float) node1.mY + 1, paint);
-                    canvas.drawPoint((float) node1.mX + 1, (float) node1.mY + 1, paint);
-
-                    canvas.drawPoint((float) (mCanvasSize - node1.mX), (float) node1.mY, paint);
-                    canvas.drawPoint((float) (mCanvasSize - node1.mX), (float) node1.mY + 1, paint);
-                    canvas.drawPoint(
-                            (float) (mCanvasSize - node1.mX + 1),
-                            (float) node1.mY + 1,
-                            paint
-                    );
+//            switch (mPaintMode) {
+//                case RECT_MODE:
+//                    if (mChangeAlpha) {
+//                        paint.setAlpha(32);
+//                    }
+//                    canvas.drawRect(
+//                            (float) node1.mX,
+//                            (float) node1.mY,
+//                            (float) node2.mX,
+//                            (float) node2.mY,
+//                            paint
+//                    );
+//                    canvas.drawRect(
+//                            (float) (mCanvasSize - node1.mX),
+//                            (float) node1.mY,
+//                            (float) (mCanvasSize - node2.mX),
+//                            (float) node2.mY,
+//                            paint
+//                    );
+//                    break;
+//
+//                default:
+            if (mChangeAlpha) {
+                paint.setAlpha(32);
             }
+
+            canvas.drawPoint((float) node1.mX, (float) node1.mY, paint);
+            canvas.drawPoint((float) node1.mX, (float) node1.mY + 1, paint);
+            canvas.drawPoint((float) node1.mX + 1, (float) node1.mY + 1, paint);
+
+            canvas.drawPoint((float) (mCanvasSize - node1.mX), (float) node1.mY, paint);
+            canvas.drawPoint((float) (mCanvasSize - node1.mX), (float) node1.mY + 1, paint);
+            canvas.drawPoint(
+                    (float) (mCanvasSize - node1.mX + 1),
+                    (float) node1.mY + 1,
+                    paint
+            );
+//            }
 
         } else {
 
-            switch (mPaintMode) {
-                case RECT_MODE:
-                    if (mChangeAlpha) {
-                        paint.setAlpha(32);
-                    }
-                    canvas.drawRect(
-                            (float) node1.mX,
-                            (float) node1.mY,
-                            (float) node2.mX,
-                            (float) node2.mY,
-                            paint
-                    );
-                    break;
-
+//            switch (mPaintMode) {
+//                case RECT_MODE:
+//                    if (mChangeAlpha) {
+//                        paint.setAlpha(32);
+//                    }
+//                    canvas.drawRect(
+//                            (float) node1.mX,
+//                            (float) node1.mY,
+//                            (float) node2.mX,
+//                            (float) node2.mY,
+//                            paint
+//                    );
+//                    break;
+//
 //                case FLARE_MODE:
 //                    paint.setAlpha(3);
 //                    canvas.drawLine(
@@ -404,20 +404,20 @@ class Foliage extends Being {
 //                            paint
 //                    );
 //                    break;
+//
+//            default:
+                if (mChangeAlpha) {
+                    paint.setAlpha(40);
+                }
 
-                default:
-                    if (mChangeAlpha) {
-                        paint.setAlpha(40);
-                    }
-
-                    canvas.drawLine(
-                            (float) node1.mX,
-                            (float) node1.mY,
-                            (float) node2.mX,
-                            (float) node2.mY,
-                            paint
-                    );
-            }
+                canvas.drawLine(
+                        (float) node1.mX,
+                        (float) node1.mY,
+                        (float) node2.mX,
+                        (float) node2.mY,
+                        paint
+                );
+//            }
 
         }
     }
@@ -437,14 +437,15 @@ class Foliage extends Being {
 
             currentNode.update(!isTouching);
 
-            if (nodeCounter < ADD_NODE_LIMIT && (++nodeCounter % mNodeDensity == 0)) {
+            if (!isTouching && nodeCounter < ADD_NODE_LIMIT && (++nodeCounter % mNodeDensity == 0))
+            {
                 addNodeNextTo(currentNode);
             }
 
             currentNode = currentNode.mNext;
         } while (!mStopped && currentNode != mFirstNode);
 
-        mSpecialNode.update(!isTouching);
+//        mSpecialNode.update(!isTouching);
 
         return mAge < MAX_AGE;
     }
@@ -463,7 +464,6 @@ class Foliage extends Being {
         node.mNext = newNeighbour;
         newNeighbour.mNext = oldNeighbour;
     }
-
 
 
     private class Node {
@@ -496,7 +496,7 @@ class Foliage extends Being {
             return Foliage.angle(mX, mY, otherNode.mX, otherNode.mY);
         }
 
-        protected void update(final boolean applyForces) {
+        private void update(final boolean applyForces) {
 
             mX += getDoubleJitter();
             mY += getDoubleJitter();
