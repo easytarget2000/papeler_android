@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import org.eztarget.papeler.data.Being;
 import org.eztarget.papeler.data.BeingBuilder;
+import org.eztarget.papeler.data.CubicleBuilder;
 import org.eztarget.papeler.data.FlowerStickBuilder;
 import org.eztarget.papeler.data.FoliageBuilder;
 
@@ -30,13 +31,13 @@ public class WayprService extends WallpaperService {
 
     private static final boolean CLEAR_FRAME = false;
 
-    private static final int PAINT_ALPHA = CLEAR_FRAME ? 200 : 16;
+//    private static final int PAINT_ALPHA = CLEAR_FRAME ? 200 : 16;
 
     private static final long MAX_TOUCH_AGE_MILLIS = 3L * 1000L;
 
     private static final float DEFAULT_STROKE_WIDTH = 1f;
 
-    private static final float BLACK_STROKE_WIDTH = 3f;
+    private static final float BLACK_STROKE_WIDTH = DEFAULT_STROKE_WIDTH;
 
     private static final float BRIGHTNESS_BEFORE_BLACK = 0.25f;
 
@@ -182,12 +183,15 @@ public class WayprService extends WallpaperService {
                 case 0:
                     mBeingBuilder = new FlowerStickBuilder(mHeight);
                     break;
+                case 1:
+                    mBeingBuilder = new CubicleBuilder(Math.min(mWidth, mHeight));
+                    break;
                 default:
                     final boolean canChangeAlpha = !mHasBackgroundImage;
                     mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), canChangeAlpha);
             }
 
-            mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), false);
+//            mBeingBuilder = new CubicleBuilder(Math.min(mWidth, mHeight));
 
             if (mBeings != null) {
                 stopAllPerformances();
@@ -265,10 +269,12 @@ public class WayprService extends WallpaperService {
 
         private void addBeing(final float x, final float y) {
 
+            final int recommendedAlpha = mBeingBuilder.getRecommendedAlpha();
+
             final long ageMinutes = (System.currentTimeMillis() - mFirstTouchMillis) / 1000L / 60L;
             if (ageMinutes > 30) {
-                if (mAlphaOffset > -(PAINT_ALPHA * 0.75)) {
-                    if (mAlphaOffset > (-PAINT_ALPHA * 0.75)) {
+                if (mAlphaOffset > -(recommendedAlpha * 0.75)) {
+                    if (mAlphaOffset > (-recommendedAlpha * 0.75)) {
                         mAlphaOffset -= 10;
                     }
                 }
@@ -278,7 +284,7 @@ public class WayprService extends WallpaperService {
                 return;
             }
 
-            mPaint.setAlpha(PAINT_ALPHA + mAlphaOffset);
+            mPaint.setAlpha(recommendedAlpha + mAlphaOffset);
 
             mBeings.add(mBeingBuilder.build(x, y));
             ++mBeingsCounter;
@@ -428,11 +434,12 @@ public class WayprService extends WallpaperService {
 
             if (useBlack) {
                 mPaint.setColor(Color.BLACK);
+                mPaint.setAlpha(64);
                 mPaint.setStrokeWidth(BLACK_STROKE_WIDTH);
             } else {
                 mPaint.setStrokeWidth(DEFAULT_STROKE_WIDTH);
                 mPaint.setARGB(
-                        PAINT_ALPHA + mAlphaOffset,
+                        mBeingBuilder.getRecommendedAlpha() + mAlphaOffset,
                         160 + rnd.nextInt(96),
                         160 + rnd.nextInt(96),
                         160 + rnd.nextInt(96)

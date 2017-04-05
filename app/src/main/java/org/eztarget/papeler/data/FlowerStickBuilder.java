@@ -22,4 +22,9 @@ public class FlowerStickBuilder implements BeingBuilder {
         Log.d(TAG, "New Flower Stick at " + x + ", " + y + ".");
         return new FlowerStick(mCanvasHeight, x, y);
     }
+
+    @Override
+    public int getRecommendedAlpha() {
+        return 128;
+    }
 }

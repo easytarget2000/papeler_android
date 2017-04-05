@@ -61,9 +61,12 @@ public class FoliageBuilder implements BeingBuilder {
                 foliage.initCircle(x, y);
         }
 
-        return new Cubicle(x, y, mCanvasSize);
+        Log.d(TAG, "Built Foliage at " + x + ", " + y + ".");
+        return foliage;
+    }
 
-//        Log.d(TAG, "Built Foliage at " + x + ", " + y + ".");
-//        return foliage;
+    @Override
+    public int getRecommendedAlpha() {
+        return 32;
     }
 }

@@ -6,6 +6,8 @@ package org.eztarget.papeler.data;
 
 public interface BeingBuilder {
 
-    public abstract Being build(final float x, final float y);
+    Being build(final float x, final float y);
+
+    int getRecommendedAlpha();
 
 }
