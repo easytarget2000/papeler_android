@@ -191,7 +191,7 @@ public class WayprService extends WallpaperService {
                     mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), canChangeAlpha);
             }
 
-            mBeingBuilder = new CubicleBuilder(Math.min(mWidth, mHeight));
+//            mBeingBuilder = new CubicleBuilder(Math.min(mWidth, mHeight));
 
             if (mBeings != null) {
                 stopAllPerformances();
