@@ -3,7 +3,6 @@ package org.eztarget.papeler.data;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 /**
  * Created by michelsievers on 04.04.17.
@@ -13,9 +12,9 @@ public class Cubicle extends Being {
 
     private static final String TAG = Cubicle.class.getSimpleName();
 
-    private static final int MAX_AGE = 4000;
+    private static final int MAX_AGE = 500;
 
-    private static final int ROUNDS_PER_DRAW_CALL = 24;
+    private static final int ROUNDS_PER_DRAW_CALL = 128;
 
     private int mAge = 0;
 
@@ -28,36 +27,35 @@ public class Cubicle extends Being {
     private float mBottomVerticesY[] = new float[4];
 
     Cubicle(final float centerX, final float centerY, final float canvasSize) {
-
 //        mDoubleJitter = canvasSize * 0.2;
 //        mFloatJitter = (float) mDoubleJitter;
 
-        final double width = random(canvasSize / 10) + (canvasSize / 20);
+        final double width = random(canvasSize / 16) + (canvasSize / 16);
         final float horizontalShift = randomF(canvasSize / 16f);
-        final float height = randomF(canvasSize / 4f) + (canvasSize / 24f);
+        final float height = (float) width * 1.5f;
 
         final int numberOfVertices = mTopVerticesX.length;
 
         final double minAngle = TWO_PI / (numberOfVertices * 0.75);
         final double maxAngle = (TWO_PI / ((double) numberOfVertices * 1.25)) - minAngle;
 
-        final double angleOffset = (TWO_PI / 4.0);
+        final double angleOffset = random(TWO_PI / 8.0);
 
-        double angle = 0.0;
+        double angle = angleOffset;
         for (int i = 0; i < numberOfVertices; i++) {
             if (i < numberOfVertices - 1) {
                 angle += minAngle + random(maxAngle);
             } else {
-                angle = TWO_PI;
+                angle = TWO_PI + angleOffset;
             }
 
-            Log.d(TAG, "Constructor: Edge " + i + ": Angle:" + angle);
+//            Log.d(TAG, "Constructor: Edge " + i + ": Angle:" + angle);
 
-            mTopVerticesX[i] = centerX + (float) (Math.cos(angle + angleOffset) * width);
+            mTopVerticesX[i] = centerX + (float) (Math.cos(angle) * width);
             mBottomVerticesX[i] = mTopVerticesX[i] + horizontalShift;
 
             mTopVerticesY[i] = (centerY + (height / 2))
-                    + (float) (Math.sin(angle + angleOffset) * width);
+                    + (float) (Math.sin(angle) * width);
             mBottomVerticesY[i] = mTopVerticesY[i] + height;
         }
 

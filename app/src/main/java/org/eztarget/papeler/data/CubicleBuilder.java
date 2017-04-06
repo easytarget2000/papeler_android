@@ -19,6 +19,6 @@ public class CubicleBuilder implements BeingBuilder {
 
     @Override
     public int getRecommendedAlpha() {
-        return 32;
+        return 24;
     }
 }
