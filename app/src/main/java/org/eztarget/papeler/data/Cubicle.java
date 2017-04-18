@@ -14,7 +14,7 @@ public class Cubicle extends Being {
 
     private static final int MAX_AGE = 500;
 
-    private static final int ROUNDS_PER_DRAW_CALL = 128;
+    private static final int ROUNDS_PER_DRAW_CALL = 256;
 
     private int mAge = 0;
 

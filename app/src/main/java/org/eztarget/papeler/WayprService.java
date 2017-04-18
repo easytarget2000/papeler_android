@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
+import org.eztarget.papeler.data.BambooTilesBuilder;
 import org.eztarget.papeler.data.Being;
 import org.eztarget.papeler.data.BeingBuilder;
 import org.eztarget.papeler.data.CubicleBuilder;
@@ -191,7 +192,7 @@ public class WayprService extends WallpaperService {
                     mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), canChangeAlpha);
             }
 
-//            mBeingBuilder = new CubicleBuilder(Math.min(mWidth, mHeight));
+            mBeingBuilder = new BambooTilesBuilder(Math.min(mWidth, mHeight));
 
             if (mBeings != null) {
                 stopAllPerformances();

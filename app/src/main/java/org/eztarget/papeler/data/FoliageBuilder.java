@@ -67,6 +67,6 @@ public class FoliageBuilder implements BeingBuilder {
 
     @Override
     public int getRecommendedAlpha() {
-        return 32;
+        return mSymmetric ? 48 : 32;
     }
 }
