@@ -21,4 +21,9 @@ public class CubicleBuilder implements BeingBuilder {
     public int getRecommendedAlpha() {
         return 24;
     }
+
+    @Override
+    public int getRecommendedMaxNumber() {
+        return 16;
+    }
 }

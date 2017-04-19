@@ -82,8 +82,6 @@ public class WayprService extends WallpaperService {
 
         private boolean mIsTouching = false;
 
-        private int mBeingsCounter = 0;
-
         private BeingBuilder mBeingBuilder;
 
         private boolean mDrawing = false;
@@ -197,7 +195,6 @@ public class WayprService extends WallpaperService {
             if (mBeings != null) {
                 stopAllPerformances();
                 mBeings = new ArrayList<>();
-                mBeingsCounter = 0;
 
                 // Draw once to clear everything.
                 mResetCanvasOnce = true;
@@ -281,14 +278,13 @@ public class WayprService extends WallpaperService {
                 }
             }
 
-            if (mBeings.size() > 10) {
+            if (mBeings.size() > mBeingBuilder.getRecommendedMaxNumber()) {
                 return;
             }
 
             mPaint.setAlpha(recommendedAlpha + mAlphaOffset);
 
             mBeings.add(mBeingBuilder.build(x, y));
-            ++mBeingsCounter;
         }
 
         private void draw() {

@@ -10,4 +10,6 @@ public interface BeingBuilder {
 
     int getRecommendedAlpha();
 
+    int getRecommendedMaxNumber();
+
 }
