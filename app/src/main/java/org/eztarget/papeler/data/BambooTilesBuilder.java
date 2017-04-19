@@ -23,11 +23,11 @@ public class BambooTilesBuilder implements BeingBuilder {
 
     @Override
     public int getRecommendedAlpha() {
-        return mDrawLines ? 16 : 32;
+        return mDrawLines ? 24 : 64;
     }
 
     @Override
     public int getRecommendedMaxNumber() {
-        return 24;
+        return 48;
     }
 }
