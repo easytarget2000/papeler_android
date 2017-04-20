@@ -30,7 +30,7 @@ public class Cubicle extends Being {
 //        mDoubleJitter = canvasSize * 0.2;
 //        mFloatJitter = (float) mDoubleJitter;
 
-        final double width = random(canvasSize / 16) + (canvasSize / 16);
+        final double width = random(canvasSize / 12) + (canvasSize / 40);
         final float horizontalShift = randomF(canvasSize / 16f);
         final float height = (float) width * 1.5f;
 

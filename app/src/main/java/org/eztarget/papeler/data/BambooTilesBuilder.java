@@ -28,6 +28,6 @@ public class BambooTilesBuilder implements BeingBuilder {
 
     @Override
     public int getRecommendedMaxNumber() {
-        return 48;
+        return 36;
     }
 }

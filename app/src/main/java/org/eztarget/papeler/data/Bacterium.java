@@ -6,37 +6,21 @@ import android.graphics.Path;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-class Foliage extends Being {
+class Bacterium extends Being {
 
-    private static final String TAG = Foliage.class.getSimpleName();
+    private static final String TAG = Bacterium.class.getSimpleName();
 
-    private static final int NUM_OF_INITIAL_NODES = 64;
+    private static final int NUM_OF_INITIAL_NODES = 48;
 
-    private static final int MAX_AGE = 160;
+    private static final int MAX_AGE = 100;
 
-    private static final int ADD_NODE_LIMIT = 34;
+    private static final int ADD_NODE_LIMIT = 80;
 
-    private static final double PUSH_FORCE = 16f;
-
-    private static final int INITIAL_FILLING_ALPHA = 5;
+    private static final double MAX_PUSH_FORCE = 16f;
 
     private Node mFirstNode;
 
-    private int mNumberOfNodes;
-
     private double mCanvasSize;
-
-    private boolean mSymmetric;
-
-    static final int LINE_MODE = 0;
-
-//    static final int RECT_MODE = 1;
-
-//    static final int FLARE_MODE = 2;
-
-    private int mPaintMode;
-
-    private boolean mChangeAlpha = true;
 
     private double mNodeDensity;
 
@@ -48,11 +32,9 @@ class Foliage extends Being {
 
     private double mMaxPushDistance;
 
-    private boolean mPaintedInitialFilling = false;
+    private double mPushForce;
 
-//    private NewNode mSpecialNode;
-
-    Foliage(final double canvasSize, final boolean canChangeAlpha) {
+    Bacterium(final double canvasSize) {
         mCanvasSize = canvasSize;
         final double nodeSize = canvasSize / 300f;
         mNodeRadius = nodeSize * 0.5f;
@@ -60,81 +42,15 @@ class Foliage extends Being {
         mNeighbourGravity = mNodeRadius * 0.5f;
         mMaxPushDistance = canvasSize * 0.1f;
         mDoubleJitter = mCanvasSize * 0.002f;
-        mChangeAlpha = canChangeAlpha;
-
-        mNumberOfNodes = NUM_OF_INITIAL_NODES;
 
         Log.d(
                 TAG,
                 "Initialized: node size: " + nodeSize
-                        + ", rect mode: " + mPaintMode
                         + ", node density: " + mNodeDensity
         );
     }
 
-    void setSymmetric(final boolean symmetric) {
-        mSymmetric = symmetric;
-    }
-
-    void setRectMode(final int paintMode) {
-        mPaintMode = paintMode;
-//        if (mPaintMode == FLARE_MODE) {
-//            mDoubleJitter *= 3;
-//        }
-    }
-
-    Foliage initSquare(final float x, final float y) {
-        final double sideLength = random(mCanvasSize * 0.15) + (mCanvasSize * 0.01);
-        final double sideLengthHalf = sideLength * 0.5;
-
-        Log.d(TAG, "initSquare()");
-
-        final int quarterOfInitialNodes = NUM_OF_INITIAL_NODES / 4;
-
-        Node lastNode = null;
-        for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
-            final Node node = new Node();
-
-            if (i < quarterOfInitialNodes) {
-                node.mX = (x - sideLengthHalf)
-                        + (sideLength * ((double) i / quarterOfInitialNodes));
-                node.mY = y - sideLengthHalf;
-            } else if (i < quarterOfInitialNodes * 2) {
-                node.mX = x + sideLengthHalf;
-                node.mY = (y - sideLengthHalf)
-                        + (sideLength *
-                        (((double) i - quarterOfInitialNodes) / quarterOfInitialNodes));
-            } else if (i < quarterOfInitialNodes * 3) {
-                node.mX = (x + sideLengthHalf)
-                        - (sideLength *
-                        (((double) i - (quarterOfInitialNodes * 2)) / quarterOfInitialNodes));
-                node.mY = y + sideLengthHalf;
-            } else {
-                node.mX = x - sideLengthHalf;
-                node.mY = (y + sideLengthHalf)
-                        - (sideLength * (
-                        ((double) i - (quarterOfInitialNodes * 3)) / quarterOfInitialNodes)
-                );
-            }
-
-            if (mFirstNode == null) {
-                mFirstNode = node;
-                lastNode = node;
-            } else if (i == NUM_OF_INITIAL_NODES - 1) {
-                mPreferredNeighbourDistance = node.distance(lastNode);
-                node.mNext = mFirstNode;
-                lastNode.mNext = node;
-            } else {
-                lastNode.mNext = node;
-                lastNode = node;
-            }
-
-        }
-
-        return this;
-    }
-
-    Foliage initCircle(final double x, final double y) {
+    Bacterium initCircle(final double x, final double y) {
         final double initialRadius = random(mCanvasSize * 0.01) + mCanvasSize * 0.05;
 
 //        final boolean closedCircle = mRandom.nextInt(4) > 1;
@@ -187,7 +103,7 @@ class Foliage extends Being {
         return this;
     }
 
-    Foliage initPolygon(final double x, final double y) {
+    Bacterium initPolygon(final double x, final double y) {
 
         final int numberOfEdges = mRandom.nextInt(5) + 3;
         final int nodesPerEdge = NUM_OF_INITIAL_NODES / numberOfEdges;
@@ -245,9 +161,7 @@ class Foliage extends Being {
         Node nextNode;
 
         final Path path = new Path();
-        if (!mSymmetric) {
-            path.moveTo((float) currentNode.mX, (float) currentNode.mY);
-        }
+        path.moveTo((float) currentNode.mX, (float) currentNode.mY);
 
         do {
             nextNode = currentNode.mNext;
@@ -256,34 +170,14 @@ class Foliage extends Being {
             }
 
 //            debugDraw(canvas, paint, currentNode, nextNode);
-            if (mSymmetric) {
-                drawSymmetric(canvas, paint, currentNode);
-            } else {
-                path.lineTo((float) nextNode.mX, (float) nextNode.mY);
-            }
+            path.lineTo((float) nextNode.mX, (float) nextNode.mY);
 
             currentNode = nextNode;
         } while (!mStopped && currentNode != mFirstNode);
 
-        if (!mSymmetric) {
-            path.close();
-
-            if (!mPaintedInitialFilling) {
-                final int lastAlpha = paint.getAlpha();
-                paint.setStyle(Paint.Style.FILL);
-                paint.setAlpha(INITIAL_FILLING_ALPHA);
-                canvas.drawPath(path, paint);
-
-                paint.setAlpha(lastAlpha);
-                paint.setStyle(Paint.Style.STROKE);
-
-                mPaintedInitialFilling = true;
-            } else {
-                canvas.drawPath(path, paint);
-            }
-
-        }
-
+        path.close();
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawPath(path, paint);
     }
 
     private void debugDraw(
@@ -295,33 +189,12 @@ class Foliage extends Being {
 
     }
 
-    private void drawSymmetric(
-            @NonNull Canvas canvas,
-            @NonNull Paint paint,
-            @NonNull Node node1
-    ) {
-
-            if (mChangeAlpha) {
-                paint.setAlpha(32);
-            }
-
-            canvas.drawPoint((float) node1.mX, (float) node1.mY, paint);
-            canvas.drawPoint((float) node1.mX, (float) node1.mY + 1, paint);
-            canvas.drawPoint((float) node1.mX + 1, (float) node1.mY + 1, paint);
-
-            canvas.drawPoint((float) (mCanvasSize - node1.mX), (float) node1.mY, paint);
-            canvas.drawPoint((float) (mCanvasSize - node1.mX), (float) node1.mY + 1, paint);
-            canvas.drawPoint(
-                    (float) (mCanvasSize - node1.mX + 1),
-                    (float) node1.mY + 1,
-                    paint
-            );
-    }
-
     @Override
     public boolean update(final boolean isTouching) {
 
         ++mAge;
+//        mPushForce = MAX_PUSH_FORCE * ((MAX_AGE - (double) mAge) / MAX_AGE);
+        mPushForce = MAX_PUSH_FORCE * ((mAge + 1.0) / (double) MAX_AGE);
         mStopped = false;
 
         int nodeCounter = 0;
@@ -333,15 +206,12 @@ class Foliage extends Being {
 
             currentNode.update(!isTouching);
 
-            if (!isTouching && nodeCounter < ADD_NODE_LIMIT && (++nodeCounter % mNodeDensity == 0))
-            {
-                addNodeNextTo(currentNode);
+            if (!isTouching && nodeCounter < ADD_NODE_LIMIT && (++nodeCounter % mNodeDensity == 0)) {
+//                addNodeNextTo(currentNode);
             }
 
             currentNode = currentNode.mNext;
         } while (!mStopped && currentNode != mFirstNode);
-
-//        mSpecialNode.update(!isTouching);
 
         return mAge < MAX_AGE;
     }
@@ -361,16 +231,15 @@ class Foliage extends Being {
         newNeighbour.mNext = oldNeighbour;
     }
 
-
     private class Node {
 
-        protected Node mNext;
+        private Node mNext;
 
-        protected double mX;
+        private double mX;
 
-        protected double mY;
+        private double mY;
 
-        protected Node() {
+        private Node() {
 
         }
 
@@ -385,11 +254,11 @@ class Foliage extends Being {
         }
 
         private double distance(final Node otherNode) {
-            return Foliage.distance(mX, mY, otherNode.mX, otherNode.mY);
+            return Bacterium.distance(mX, mY, otherNode.mX, otherNode.mY);
         }
 
         private double angle(final Node otherNode) {
-            return Foliage.angle(mX, mY, otherNode.mX, otherNode.mY);
+            return Bacterium.angle(mX, mY, otherNode.mX, otherNode.mY);
         }
 
         private void update(final boolean applyForces) {
@@ -431,8 +300,7 @@ class Foliage extends Being {
                 if (otherNode == mNext) {
 
                     if (distance > mPreferredNeighbourDistance) {
-//                        force = mPreferredNeighbourDistanceHalf;
-                        force += (distance / PUSH_FORCE);
+                        force += (distance / mPushForce);
                     } else {
                         force -= mNeighbourGravity;
                     }
@@ -442,7 +310,7 @@ class Foliage extends Being {
                     if (distance < mNodeRadius) {
                         force -= mNodeRadius;
                     } else {
-                        force -= (PUSH_FORCE / distance);
+                        force -= (mPushForce / distance);
                     }
 
                 }
@@ -454,23 +322,6 @@ class Foliage extends Being {
             } while (!mStopped);
         }
 
-    }
-
-    private class NewNode extends Node {
-
-        private NewNode(final double x, final double y) {
-            mX = x;
-            mY = y;
-
-//            mAccelerationScale = mCanvasSize * 0.01 * mRandom.nextDouble();
-//            mAccelerationAngle = mRandom.nextDouble() * TWO_PI;
-        }
-
-        @Override
-        protected void updateAcceleration() {
-            mX *= 0.9;
-            mY += mCanvasSize * 0.01;
-        }
     }
 
 }

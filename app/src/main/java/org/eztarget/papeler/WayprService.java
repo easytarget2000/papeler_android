@@ -172,11 +172,6 @@ public class WayprService extends WallpaperService {
             initCanvas();
 
             mPaint.setStyle(Paint.Style.STROKE);
-//            if (new Random().nextInt(7) > 4) {
-//                mPaint.setStyle(Paint.Style.STROKE);
-//            } else {
-//                mPaint.setStyle(Paint.Style.FILL);
-//            }
 
             switch ((int) (Math.random() * 5)) {
                 case 0:
@@ -185,12 +180,15 @@ public class WayprService extends WallpaperService {
                 case 1:
                     mBeingBuilder = new CubicleBuilder(Math.min(mWidth, mHeight));
                     break;
+                case 2:
+                    mBeingBuilder = new BambooTilesBuilder(Math.min(mWidth, mHeight));
+                    break;
                 default:
                     final boolean canChangeAlpha = !mHasBackgroundImage;
                     mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), canChangeAlpha);
             }
 
-            mBeingBuilder = new BambooTilesBuilder(Math.min(mWidth, mHeight));
+//            mBeingBuilder = new CubicleBuilder(Math.min(mWidth, mHeight));
 
             if (mBeings != null) {
                 stopAllPerformances();

@@ -25,7 +25,7 @@ public class FlowerStickBuilder implements BeingBuilder {
 
     @Override
     public int getRecommendedAlpha() {
-        return 128;
+        return 64;
     }
 
     @Override
