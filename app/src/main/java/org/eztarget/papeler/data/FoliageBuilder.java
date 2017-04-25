@@ -24,7 +24,7 @@ public class FoliageBuilder implements BeingBuilder {
         final Random random = new Random();
 
         mCanvasSize = canvasSize;
-        mSymmetric = random.nextInt(3) % 3 == 0;
+        mSymmetric = random.nextInt(3) % 2 == 0;
         mCanChangeAlpha = canChangeAlpha;
 //        if (this.mSymmetric) {
 //            this.mPaintMode = (random.nextInt(2) % 2 == 0) ? Foliage.LINE_MODE : Foliage.CIRCLE_MODE;
@@ -67,7 +67,7 @@ public class FoliageBuilder implements BeingBuilder {
 
     @Override
     public int getRecommendedAlpha() {
-        return mSymmetric ? 20 : 16;
+        return mSymmetric ? 22 : 16;
     }
 
     @Override

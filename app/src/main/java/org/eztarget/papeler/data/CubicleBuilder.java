@@ -19,11 +19,11 @@ public class CubicleBuilder implements BeingBuilder {
 
     @Override
     public int getRecommendedAlpha() {
-        return 24;
+        return 8;
     }
 
     @Override
     public int getRecommendedMaxNumber() {
-        return 16;
+        return 24;
     }
 }

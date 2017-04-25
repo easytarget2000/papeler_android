@@ -13,4 +13,5 @@ interface UpdateAndDrawable {
     boolean update(final boolean isTouching);
 
     void draw(@NonNull final Canvas canvas, @NonNull final Paint paint1);
+
 }

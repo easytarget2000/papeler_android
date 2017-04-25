@@ -12,17 +12,15 @@ class Foliage extends Being {
 
     private static final int NUM_OF_INITIAL_NODES = 64;
 
-    private static final int MAX_AGE = 160;
+    private static final int MAX_AGE = 240;
 
-    private static final int ADD_NODE_LIMIT = 34;
+    private static final int ADD_NODE_LIMIT = 24;
 
-    private static final double PUSH_FORCE = 16f;
+    private static final double PUSH_FORCE = 8f;
 
     private static final int INITIAL_FILLING_ALPHA = 5;
 
     private Node mFirstNode;
-
-    private int mNumberOfNodes;
 
     private double mCanvasSize;
 
@@ -30,9 +28,6 @@ class Foliage extends Being {
 
     static final int LINE_MODE = 0;
 
-//    static final int RECT_MODE = 1;
-
-//    static final int FLARE_MODE = 2;
 
     private int mPaintMode;
 
@@ -61,8 +56,6 @@ class Foliage extends Being {
         mMaxPushDistance = canvasSize * 0.1f;
         mDoubleJitter = mCanvasSize * 0.002f;
         mChangeAlpha = canChangeAlpha;
-
-        mNumberOfNodes = NUM_OF_INITIAL_NODES;
 
         Log.d(
                 TAG,

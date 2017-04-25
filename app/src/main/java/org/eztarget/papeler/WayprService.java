@@ -173,7 +173,7 @@ public class WayprService extends WallpaperService {
 
             mPaint.setStyle(Paint.Style.STROKE);
 
-            switch ((int) (Math.random() * 5)) {
+            switch ((int) (Math.random() * 6)) {
                 case 0:
                     mBeingBuilder = new FlowerStickBuilder(mHeight);
                     break;
@@ -265,7 +265,12 @@ public class WayprService extends WallpaperService {
 
         private void addBeing(final float x, final float y) {
 
-            final int recommendedAlpha = mBeingBuilder.getRecommendedAlpha();
+            final int recommendedAlpha;
+            if (CLEAR_FRAME) {
+                recommendedAlpha = 255;
+            } else {
+                recommendedAlpha = mBeingBuilder.getRecommendedAlpha();
+            }
 
             final long ageMinutes = (System.currentTimeMillis() - mFirstTouchMillis) / 1000L / 60L;
             if (ageMinutes > 30) {
