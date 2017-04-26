@@ -15,7 +15,6 @@ import android.widget.Toast;
 import org.eztarget.papeler.data.BambooTilesBuilder;
 import org.eztarget.papeler.data.Being;
 import org.eztarget.papeler.data.BeingBuilder;
-import org.eztarget.papeler.data.CubicleBuilder;
 import org.eztarget.papeler.data.FlowerStickBuilder;
 import org.eztarget.papeler.data.FoliageBuilder;
 
@@ -177,9 +176,9 @@ public class WayprService extends WallpaperService {
                 case 0:
                     mBeingBuilder = new FlowerStickBuilder(mHeight);
                     break;
-                case 1:
-                    mBeingBuilder = new CubicleBuilder(Math.min(mWidth, mHeight));
-                    break;
+//                case 1:
+//                    mBeingBuilder = new CubicleBuilder(Math.min(mWidth, mHeight));
+//                    break;
                 case 2:
                     mBeingBuilder = new BambooTilesBuilder(Math.min(mWidth, mHeight));
                     break;
