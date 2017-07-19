@@ -10,6 +10,8 @@ import android.support.annotation.NonNull;
 
 public class Landscape extends Being {
 
+    private static final int MAX_AGE = 512;
+
     private Slope[] mFirstSlopes;
 
     private float mMaxWidth;
@@ -19,7 +21,7 @@ public class Landscape extends Being {
     public Landscape(final float y, final float maxWidth, final float maxHeight) {
         mMaxWidth = maxWidth;
         mMaxHeight = maxHeight;
-        mFirstSlopes = new Slope[64];
+        mFirstSlopes = new Slope[2 + (int) random(4.0)];
         for (int i = 0; i < mFirstSlopes.length; i++) {
             final float speed = 20f * ((mFirstSlopes.length - i + 1f) / (float) mFirstSlopes.length);
             mFirstSlopes[i] = new Slope(0f, y, speed);
@@ -29,24 +31,22 @@ public class Landscape extends Being {
     @Override
     public boolean update(boolean isTouching) {
 
-        boolean updatedOneSlope = false;
-
         for (Slope firstSlope : mFirstSlopes) {
             Slope currentSlope = firstSlope;
 
             while (currentSlope != null) {
 
                 if (currentSlope.update()) {
-                    updatedOneSlope = true;
+//                    updatedOneSlope = true;
                 } else {
-                    firstSlope = currentSlope.mNextSlope;
+//                    firstSlope = currentSlope.mNextSlope;
                 }
 
                 currentSlope = currentSlope.mNextSlope;
             }
         }
 
-        return updatedOneSlope;
+        return ++mAge < MAX_AGE;
     }
 
     @Override
@@ -91,11 +91,11 @@ public class Landscape extends Being {
             mRightX += -mSpeed;
 
             if (mLeftX < mMaxWidth && mNextSlope == null) {
-                if (mRightY > mMaxHeight) {
-                    mNextSlope = new Slope(mMaxWidth, 0f, mSpeed);
-                } else {
+//                if (mRightY > mMaxHeight) {
+//                    mNextSlope = new Slope(mMaxWidth, 0f, mSpeed);
+//                } else {
                     mNextSlope = new Slope(mRightX + mSpeed, mRightY, mSpeed);
-                }
+//                }
                 return false;
             } else if (mRightX < 0f) {
                 return false;

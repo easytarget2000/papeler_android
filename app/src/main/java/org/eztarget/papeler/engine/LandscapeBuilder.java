@@ -13,11 +13,11 @@ public class LandscapeBuilder implements BeingBuilder {
 
     @Override
     public int getRecommendedAlpha() {
-        return 64;
+        return 32;
     }
 
     @Override
     public int getRecommendedMaxNumber() {
-        return 1;
+        return 8;
     }
 }
