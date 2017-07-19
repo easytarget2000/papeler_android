@@ -17,6 +17,7 @@ import org.eztarget.papeler.engine.Being;
 import org.eztarget.papeler.engine.BeingBuilder;
 import org.eztarget.papeler.engine.FlowerStickBuilder;
 import org.eztarget.papeler.engine.FoliageBuilder;
+import org.eztarget.papeler.engine.LandscapeBuilder;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -188,7 +189,7 @@ public class WayprService extends WallpaperService {
             }
 
 //            final boolean canChangeAlpha = !mHasBackgroundImage;
-//            mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), canChangeAlpha);
+            mBeingBuilder = new LandscapeBuilder();
 
             if (mBeings != null) {
                 stopAllPerformances();
