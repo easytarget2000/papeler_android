@@ -12,11 +12,11 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
-import org.eztarget.papeler.data.BambooTilesBuilder;
-import org.eztarget.papeler.data.Being;
-import org.eztarget.papeler.data.BeingBuilder;
-import org.eztarget.papeler.data.FlowerStickBuilder;
-import org.eztarget.papeler.data.FoliageBuilder;
+import org.eztarget.papeler.engine.BambooTilesBuilder;
+import org.eztarget.papeler.engine.Being;
+import org.eztarget.papeler.engine.BeingBuilder;
+import org.eztarget.papeler.engine.FlowerStickBuilder;
+import org.eztarget.papeler.engine.FoliageBuilder;
 
 import java.util.ArrayList;
 import java.util.Random;
