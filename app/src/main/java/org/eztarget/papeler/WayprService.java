@@ -175,7 +175,9 @@ public class WayprService extends WallpaperService {
 
             switch ((int) (Math.random() * 6)) {
                 case 0:
-                    mBeingBuilder = new FlowerStickBuilder(mHeight);
+                    final LandscapeBuilder landscapeBuilder = new LandscapeBuilder();
+                    landscapeBuilder.setCanvasHeight(mHeight);
+                    mBeingBuilder = landscapeBuilder;
                     break;
 //                case 1:
 //                    mBeingBuilder = new CubicleBuilder(Math.min(mWidth, mHeight));
@@ -188,8 +190,9 @@ public class WayprService extends WallpaperService {
                     mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), canChangeAlpha);
             }
 
-//            final boolean canChangeAlpha = !mHasBackgroundImage;
-            mBeingBuilder = new LandscapeBuilder();
+//            final LandscapeBuilder landscapeBuilder = new LandscapeBuilder();
+//            landscapeBuilder.setCanvasHeight(mHeight);
+//            mBeingBuilder = landscapeBuilder;
 
             if (mBeings != null) {
                 stopAllPerformances();

@@ -6,9 +6,15 @@ package org.eztarget.papeler.engine;
 
 public class LandscapeBuilder implements BeingBuilder {
 
+    private float mCanvasHeight = 1920f;
+
+    public void setCanvasHeight(final float canvasHeight) {
+        mCanvasHeight = canvasHeight;
+    }
+
     @Override
     public Being build(float x, float y) {
-        return new Landscape(y, x * 2f, y * 1.25f);
+        return new Landscape(y, x * 2f, mCanvasHeight / 16f);
     }
 
     @Override

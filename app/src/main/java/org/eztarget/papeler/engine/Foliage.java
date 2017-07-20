@@ -444,8 +444,8 @@ class Foliage extends Being {
             mX = x;
             mY = y;
 
-//            mAccelerationScale = mCanvasSize * 0.01 * mRandom.nextDouble();
-//            mAccelerationAngle = mRandom.nextDouble() * TWO_PI;
+//            mAccelerationScale = mCanvasSize * 0.01 * mRandom.nextFloat();
+//            mAccelerationAngle = mRandom.nextFloat() * TWO_PI;
         }
 
         @Override

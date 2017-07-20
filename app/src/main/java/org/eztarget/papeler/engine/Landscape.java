@@ -3,6 +3,7 @@ package org.eztarget.papeler.engine;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 /**
  * Created by michelsievers on 19.07.17.
@@ -10,7 +11,11 @@ import android.support.annotation.NonNull;
 
 public class Landscape extends Being {
 
-    private static final int MAX_AGE = 512;
+    private static final String TAG = Landscape.class.getSimpleName();
+
+    private static final boolean VERBOSE = false;
+
+    private static final int MAX_AGE = 256;
 
     private Slope[] mFirstSlopes;
 
@@ -20,11 +25,20 @@ public class Landscape extends Being {
 
     public Landscape(final float y, final float maxWidth, final float maxHeight) {
         mMaxWidth = maxWidth;
+        final float maxSpeed = maxWidth / 128f;
         mMaxHeight = maxHeight;
         mFirstSlopes = new Slope[2 + (int) random(4.0)];
         for (int i = 0; i < mFirstSlopes.length; i++) {
-            final float speed = 20f * ((mFirstSlopes.length - i + 1f) / (float) mFirstSlopes.length);
-            mFirstSlopes[i] = new Slope(0f, y, speed);
+            final float speedFactor = ((i + 1f) / (float) mFirstSlopes.length);
+            mFirstSlopes[i] = new Slope(maxWidth, y, maxSpeed * speedFactor);
+
+            if (VERBOSE) {
+                Log.d(
+                        TAG,
+                        "New Slope: speedFactor: " + speedFactor
+                                + " -> speed: " + maxSpeed * speedFactor
+                );
+            }
         }
     }
 
@@ -82,19 +96,24 @@ public class Landscape extends Being {
             mLeftY = leftY;
             mSpeed = speed;
 
-            mRightX = leftX + (float) random(128);
-            mRightY = (leftY + (float) random(20 - 10));
+            mRightX = leftX + randomF(mMaxWidth * 0.75f);
+            mRightY = leftY + (mMaxHeight / 2f - randomF(mMaxHeight));
         }
 
         private boolean update() {
             mLeftX += -mSpeed;
             mRightX += -mSpeed;
 
+            if (mRightY > mMaxWidth || mRightY < 0f) {
+                mRightY -= Random.nextFloat(mRightY - mMaxWidth);
+                mSpeed = -mSpeed;
+            }
+
             if (mLeftX < mMaxWidth && mNextSlope == null) {
 //                if (mRightY > mMaxHeight) {
 //                    mNextSlope = new Slope(mMaxWidth, 0f, mSpeed);
 //                } else {
-                    mNextSlope = new Slope(mRightX + mSpeed, mRightY, mSpeed);
+                mNextSlope = new Slope(mRightX + mSpeed, mRightY, mSpeed * 1.2f);
 //                }
                 return false;
             } else if (mRightX < 0f) {

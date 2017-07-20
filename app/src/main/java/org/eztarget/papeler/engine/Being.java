@@ -1,7 +1,5 @@
 package org.eztarget.papeler.engine;
 
-import java.util.Random;
-
 /**
  * Created by michelsievers on 04/03/2017.
  */
@@ -18,7 +16,7 @@ public abstract class Being implements UpdateAndDrawable {
 
     protected float mFloatJitter;
 
-    protected Random mRandom = new Random();
+    protected java.util.Random mRandom = new java.util.Random();
 
     public void stopPerforming() {
         mStopped = true;
@@ -33,11 +31,11 @@ public abstract class Being implements UpdateAndDrawable {
     }
 
     protected double random(final double maxValue) {
-        return mRandom.nextDouble() * maxValue;
+        return Random.nextDouble(maxValue);
     }
 
     protected float randomF(final float maxValue) {
-        return mRandom.nextFloat() * maxValue;
+        return Random.nextFloat(maxValue);
     }
 
     protected static double angle(
