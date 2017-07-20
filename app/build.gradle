@@ -7,7 +7,7 @@ android {
         applicationId "org.eztarget.papeler"
         minSdkVersion 9
         targetSdkVersion 25
-        versionCode 38
+        versionCode 39
         versionName "1.0." + versionCode
     }
     buildTypes {
