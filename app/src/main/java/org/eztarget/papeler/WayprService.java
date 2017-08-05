@@ -173,26 +173,25 @@ public class WayprService extends WallpaperService {
 
             mPaint.setStyle(Paint.Style.STROKE);
 
-            switch ((int) (Math.random() * 6)) {
-                case 0:
-                    final LandscapeBuilder landscapeBuilder = new LandscapeBuilder();
-                    landscapeBuilder.setCanvasHeight(mHeight);
-                    mBeingBuilder = landscapeBuilder;
-                    break;
+//            switch ((int) (Math.random() * 6)) {
+//                case 0:
+//                    final LandscapeBuilder landscapeBuilder = new LandscapeBuilder();
+//                    landscapeBuilder.setCanvasHeight(mHeight);
+//                    mBeingBuilder = landscapeBuilder;
+//                    break;
 //                case 1:
 //                    mBeingBuilder = new CubicleBuilder(Math.min(mWidth, mHeight));
 //                    break;
-                case 2:
-                    mBeingBuilder = new BambooTilesBuilder(Math.min(mWidth, mHeight));
-                    break;
-                default:
-                    final boolean canChangeAlpha = !mHasBackgroundImage;
-                    mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), canChangeAlpha);
-            }
+//                case 2:
+//                    mBeingBuilder = new BambooTilesBuilder(Math.min(mWidth, mHeight));
+//                    break;
+//                default:
+//                    final boolean canChangeAlpha = !mHasBackgroundImage;
+//                    mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), canChangeAlpha);
+//            }
 
-//            final LandscapeBuilder landscapeBuilder = new LandscapeBuilder();
-//            landscapeBuilder.setCanvasHeight(mHeight);
-//            mBeingBuilder = landscapeBuilder;
+            final boolean canChangeAlpha = !mHasBackgroundImage;
+            mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), canChangeAlpha);
 
             if (mBeings != null) {
                 stopAllPerformances();
