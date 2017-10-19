@@ -58,7 +58,7 @@ public class PreferenceAccess {
     }
 
     boolean hasNewBackgroundImage() {
-        return mPrefs.getBoolean("NEW_IMAGE", true);
+        return mPrefs.getBoolean("NEW_IMAGE", false);
     }
 
     private void edit(final String key, final boolean value) {

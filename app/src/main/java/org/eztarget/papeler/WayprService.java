@@ -2,8 +2,10 @@ package org.eztarget.papeler;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.MaskFilter;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
@@ -45,6 +47,8 @@ public class WayprService extends WallpaperService {
     private static final int BRIGHTNESS_SAMPLE_SIZE = 128;
 
     private static final boolean VERBOSE = BuildConfig.DEBUG && false;
+
+    private boolean mBlur = true;
 
     @Override
     public Engine onCreateEngine() {
@@ -398,7 +402,7 @@ public class WayprService extends WallpaperService {
 
             if (mHasBackgroundImage) {
                 mPaint.setColor(mBitmap.getPixel(x, y));
-                mPaint.setAlpha(64);
+                mPaint.setAlpha(128);
                 return;
             }
 
@@ -450,7 +454,7 @@ public class WayprService extends WallpaperService {
             }
 
 //            if (mBlur) {
-//                final float blurRadius = ((float) width) * 0.01f;
+//                final float blurRadius = ((float) bitmapWidth) * 0.01f;
 //                final MaskFilter blur = new BlurMaskFilter(blurRadius, BlurMaskFilter.Blur.NORMAL);
 //                mPaint.setMaskFilter(blur);
 //                mPaint.setAlpha(mPaint.getAlpha() + 150);
