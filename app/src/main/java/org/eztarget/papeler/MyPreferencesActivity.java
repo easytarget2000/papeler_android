@@ -78,7 +78,7 @@ public class MyPreferencesActivity extends AppCompatActivity {
     }
 
     private void showProgressBar(final double progress) {
-        final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_prefs);
+        final ProgressBar progressBar = findViewById(R.id.progress_prefs);
         progressBar.setVisibility(View.VISIBLE);
         final int maxProgress = progressBar.getMax();
         progressBar.setProgress((int) (progress * maxProgress));
@@ -86,7 +86,7 @@ public class MyPreferencesActivity extends AppCompatActivity {
     }
 
     private void hideProgressBar() {
-        final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_prefs);
+        final ProgressBar progressBar = findViewById(R.id.progress_prefs);
         progressBar.setVisibility(View.GONE);
         progressBar.setProgress(0);
         mIsBusy = false;
@@ -182,7 +182,7 @@ public class MyPreferencesActivity extends AppCompatActivity {
             return;
         }
 
-        final ImageView backgroundView = (ImageView) findViewById(R.id.image_prefs_bg);
+        final ImageView backgroundView = findViewById(R.id.image_prefs_bg);
         backgroundView.setImageBitmap(image);
 
         setRemoveButtonEnabled(true);
@@ -198,7 +198,7 @@ public class MyPreferencesActivity extends AppCompatActivity {
     private void removeImage() {
         PreferenceAccess.with(this).setHasBackgroundImage(false);
 
-        final ImageView backgroundView = (ImageView) findViewById(R.id.image_prefs_bg);
+        final ImageView backgroundView = findViewById(R.id.image_prefs_bg);
         backgroundView.setImageBitmap(null);
         setRemoveButtonEnabled(false);
 
@@ -206,7 +206,7 @@ public class MyPreferencesActivity extends AppCompatActivity {
     }
 
     private void setRemoveButtonEnabled(final boolean enabled) {
-        final Button removeImageButton = (Button) findViewById(R.id.button_prefs_delete_img);
+        final Button removeImageButton = findViewById(R.id.button_prefs_delete_img);
         removeImageButton.setEnabled(enabled);
     }
 
@@ -263,9 +263,7 @@ public class MyPreferencesActivity extends AppCompatActivity {
 
         private String setAndShowSelectedImage(@Nullable final Uri imageUri) {
 
-
             if (imageUri == null) {
-                removeImage();
                 return "Error 1209";
             }
 
@@ -273,7 +271,6 @@ public class MyPreferencesActivity extends AppCompatActivity {
 
             final String copyErrorMessage = copyImageToAppDir(imageUri);
             if (copyErrorMessage != null) {
-                removeImage();
                 return copyErrorMessage;
             }
 
