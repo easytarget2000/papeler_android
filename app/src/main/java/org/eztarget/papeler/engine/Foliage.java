@@ -30,7 +30,7 @@ class Foliage extends Being {
 
     private int mPaintMode;
 
-    private boolean mChangeAlpha = true;
+    private boolean mChangeAlpha;
 
     private double mNodeDensity;
 
@@ -43,8 +43,6 @@ class Foliage extends Being {
     private double mMaxPushDistance;
 
     private boolean mPaintedInitialFilling = false;
-
-//    private NewNode mSpecialNode;
 
     Foliage(final double canvasSize, final boolean canChangeAlpha) {
         mCanvasSize = canvasSize;
@@ -70,60 +68,6 @@ class Foliage extends Being {
 
     void setRectMode(final int paintMode) {
         mPaintMode = paintMode;
-//        if (mPaintMode == FLARE_MODE) {
-//            mDoubleJitter *= 3;
-//        }
-    }
-
-    Foliage initSquare(final float x, final float y) {
-        final double sideLength = random(mCanvasSize * 0.15) + (mCanvasSize * 0.01);
-        final double sideLengthHalf = sideLength * 0.5;
-
-        Log.d(TAG, "initSquare()");
-
-        final int quarterOfInitialNodes = NUM_OF_INITIAL_NODES / 4;
-
-        Node lastNode = null;
-        for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
-            final Node node = new Node();
-
-            if (i < quarterOfInitialNodes) {
-                node.mX = (x - sideLengthHalf)
-                        + (sideLength * ((double) i / quarterOfInitialNodes));
-                node.mY = y - sideLengthHalf;
-            } else if (i < quarterOfInitialNodes * 2) {
-                node.mX = x + sideLengthHalf;
-                node.mY = (y - sideLengthHalf)
-                        + (sideLength *
-                        (((double) i - quarterOfInitialNodes) / quarterOfInitialNodes));
-            } else if (i < quarterOfInitialNodes * 3) {
-                node.mX = (x + sideLengthHalf)
-                        - (sideLength *
-                        (((double) i - (quarterOfInitialNodes * 2)) / quarterOfInitialNodes));
-                node.mY = y + sideLengthHalf;
-            } else {
-                node.mX = x - sideLengthHalf;
-                node.mY = (y + sideLengthHalf)
-                        - (sideLength * (
-                        ((double) i - (quarterOfInitialNodes * 3)) / quarterOfInitialNodes)
-                );
-            }
-
-            if (mFirstNode == null) {
-                mFirstNode = node;
-                lastNode = node;
-            } else if (i == NUM_OF_INITIAL_NODES - 1) {
-                mPreferredNeighbourDistance = node.distance(lastNode);
-                node.mNext = mFirstNode;
-                lastNode.mNext = node;
-            } else {
-                lastNode.mNext = node;
-                lastNode = node;
-            }
-
-        }
-
-        return this;
     }
 
     Foliage initCircle(final double x, final double y) {
@@ -177,9 +121,7 @@ class Foliage extends Being {
         final double size = random(mCanvasSize / 8.0);
 
         final double polygonAngle = random(TWO_PI);
-
-        initSpecialNode(x, y);
-
+        
         Node lastNode = null;
         for (int i = 0; i < NUM_OF_INITIAL_NODES; i++) {
 
@@ -217,11 +159,6 @@ class Foliage extends Being {
 
         return this;
     }
-
-    private void initSpecialNode(final double x, final double y) {
-//        mSpecialNode = new NewNode(x, y);
-    }
-
     @Override
     public void draw(@NonNull Canvas canvas, @NonNull Paint paint) {
         Node currentNode = mFirstNode;
