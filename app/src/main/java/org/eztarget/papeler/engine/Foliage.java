@@ -16,7 +16,7 @@ class Foliage extends Being {
 
     private static final int ADD_NODE_LIMIT = 8;
 
-    private static final double PUSH_FORCE = 8f;
+    private static final double PUSH_FORCE = 4f;
 
     private static final int INITIAL_FILLING_ALPHA = 5;
 
@@ -413,7 +413,6 @@ class Foliage extends Being {
                 if (otherNode == mNext) {
 
                     if (distance > mPreferredNeighbourDistance) {
-//                        force = mPreferredNeighbourDistanceHalf;
                         force += (distance / PUSH_FORCE);
                     } else {
                         force -= mNeighbourGravity;
@@ -436,23 +435,6 @@ class Foliage extends Being {
             } while (!mStopped);
         }
 
-    }
-
-    private class NewNode extends Node {
-
-        private NewNode(final double x, final double y) {
-            mX = x;
-            mY = y;
-
-//            mAccelerationScale = mCanvasSize * 0.01 * mRandom.nextFloat();
-//            mAccelerationAngle = mRandom.nextFloat() * TWO_PI;
-        }
-
-        @Override
-        protected void updateAcceleration() {
-            mX *= 0.9;
-            mY += mCanvasSize * 0.01;
-        }
     }
 
 }

@@ -2,11 +2,12 @@ package org.eztarget.papeler;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.MaskFilter;
 import android.graphics.Paint;
 import android.os.Handler;
-import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -14,25 +15,18 @@ import android.widget.Toast;
 
 import org.eztarget.papeler.engine.Being;
 import org.eztarget.papeler.engine.BeingBuilder;
-import org.eztarget.papeler.engine.CubicleBuilder;
 import org.eztarget.papeler.engine.FoliageBuilder;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 /**
- * Created by michelsievers on 23/01/2017.
+ * Created by michel@easy-target.org on 23/01/2017.
  */
 
-public class WayprService extends WallpaperService {
+public class WallpaperService extends android.service.wallpaper.WallpaperService {
 
-    private static final String TAG = WayprService.class.getSimpleName();
-
-    private static final boolean CLEAR_FRAME = false;
-
-//    private static final int PAINT_ALPHA = CLEAR_FRAME ? 200 : 16;
-
-    private static final long MAX_TOUCH_AGE_MILLIS = 3L * 1000L;
+    private static final String TAG = WallpaperService.class.getSimpleName();
 
     private static final float DEFAULT_STROKE_WIDTH = 1f;
 
@@ -44,15 +38,15 @@ public class WayprService extends WallpaperService {
 
     private static final boolean VERBOSE = BuildConfig.DEBUG && false;
 
-    private boolean mBlur = true;
+    private boolean mBlur = false;
 
     @Override
-    public Engine onCreateEngine() {
+    public android.service.wallpaper.WallpaperService.Engine onCreateEngine() {
         Log.d(TAG, "onCreateEngine()");
-        return new WayprEngine();
+        return new Engine();
     }
 
-    private class WayprEngine extends Engine {
+    private class Engine extends android.service.wallpaper.WallpaperService.Engine {
 
         private final Handler mHandler = new Handler();
 
@@ -96,10 +90,10 @@ public class WayprService extends WallpaperService {
 
         private boolean mHasBackgroundImage;
 
-        WayprEngine() {
+        Engine() {
 
             if (VERBOSE) {
-                Log.d(TAG, "WayprEngine()");
+                Log.d(TAG, "Engine()");
             }
 
             mPaint.setAntiAlias(true);
@@ -115,7 +109,7 @@ public class WayprService extends WallpaperService {
             mFirstTouchMillis = 0L;
 
             if (VERBOSE) {
-                Log.d(TAG, "WayprEngine.onVisibilityChanged(" + mVisible + ")");
+                Log.d(TAG, "Engine.onVisibilityChanged(" + mVisible + ")");
             }
 
             nextStep();
@@ -124,12 +118,12 @@ public class WayprService extends WallpaperService {
 
             if (preferences.getAndUnsetIsFirstTime()) {
                 final String welcomeMessage = getString(R.string.main_welcome_msg);
-                Toast.makeText(WayprService.this, welcomeMessage, Toast.LENGTH_LONG).show();
+                Toast.makeText(WallpaperService.this, welcomeMessage, Toast.LENGTH_LONG).show();
 
                 final String secondMessage = getString(R.string.main_welcome_msg_2);
 
                 final Toast secondToast;
-                secondToast = Toast.makeText(WayprService.this, secondMessage, Toast.LENGTH_LONG);
+                secondToast = Toast.makeText(WallpaperService.this, secondMessage, Toast.LENGTH_LONG);
                 new Handler().postDelayed(
                         new Runnable() {
                             @Override
@@ -154,7 +148,7 @@ public class WayprService extends WallpaperService {
         public void onSurfaceDestroyed(SurfaceHolder holder) {
             super.onSurfaceDestroyed(holder);
 
-            Log.d(TAG, "WayprEngine.onSurfaceDestroyed(" + mVisible + ")");
+            Log.d(TAG, "Engine.onSurfaceDestroyed(" + mVisible + ")");
 
             mVisible = false;
             stopAllPerformances();
@@ -205,7 +199,7 @@ public class WayprService extends WallpaperService {
                     Toast.makeText(context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 
                     PreferenceAccess.with(context).setHasBackgroundImage(false);
-                    initEmtpyCanvas();
+                    initEmptyCanvas();
                     return;
                 }
 
@@ -215,11 +209,11 @@ public class WayprService extends WallpaperService {
                 PreferenceAccess.with(context).acknowledgeNewBackgroundImage();
 
             } else {
-                initEmtpyCanvas();
+                initEmptyCanvas();
             }
         }
 
-        private void initEmtpyCanvas() {
+        private void initEmptyCanvas() {
             mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
             mCanvas.drawColor(mBackgroundColor);
@@ -251,12 +245,7 @@ public class WayprService extends WallpaperService {
 
         private void addBeing(final float x, final float y) {
 
-            final int recommendedAlpha;
-            if (CLEAR_FRAME) {
-                recommendedAlpha = 255;
-            } else {
-                recommendedAlpha = mBeingBuilder.getRecommendedAlpha();
-            }
+            final int recommendedAlpha = mBeingBuilder.getRecommendedAlpha();
 
             final long ageMinutes = (System.currentTimeMillis() - mFirstTouchMillis) / 1000L / 60L;
             if (ageMinutes > 30) {
@@ -285,7 +274,7 @@ public class WayprService extends WallpaperService {
             mDrawing = true;
 
             if (VERBOSE) {
-                Log.d(TAG, "WayprEngine.draw()");
+                Log.d(TAG, "Engine.draw()");
             }
             final long startMillis = System.currentTimeMillis();
 
@@ -305,10 +294,6 @@ public class WayprService extends WallpaperService {
                         drawBeings();
                     }
                     canvas.drawBitmap(mBitmap, 0f, 0f, null);
-
-                    if (CLEAR_FRAME) {
-                        mCanvas.drawColor(Color.BLACK);
-                    }
                 }
             } finally {
                 if (canvas != null) {
@@ -325,7 +310,7 @@ public class WayprService extends WallpaperService {
             if (VERBOSE) {
                 Log.d(
                         TAG,
-                        "WayprEngine.draw() took "
+                        "Engine.draw() took "
                                 + (System.currentTimeMillis() - startMillis) + "ms."
                 );
             }
@@ -333,7 +318,7 @@ public class WayprService extends WallpaperService {
             if (updateBeings()) {
                 nextStep();
             } else {
-                Log.d(TAG, "WayprEngine.draw() not calling nextStep().");
+                Log.d(TAG, "Engine.draw() not calling nextStep().");
             }
         }
 
@@ -347,7 +332,7 @@ public class WayprService extends WallpaperService {
 
                 if (!beingGrew) {
                     mBeings.remove(i);
-                    Log.d(TAG, "WayprEngine.draw() removing Foliage " + i + ".");
+                    Log.d(TAG, "Engine.draw() removing Foliage " + i + ".");
                 }
             }
 
@@ -363,7 +348,7 @@ public class WayprService extends WallpaperService {
         private void nextStep() {
 
             if (VERBOSE) {
-                Log.d(TAG, "WayprEngine.nextStep()");
+                Log.d(TAG, "Engine.nextStep()");
             }
 
             cancelDrawSchedule();
@@ -444,12 +429,12 @@ public class WayprService extends WallpaperService {
                 );
             }
 
-//            if (mBlur) {
-//                final float blurRadius = ((float) bitmapWidth) * 0.01f;
-//                final MaskFilter blur = new BlurMaskFilter(blurRadius, BlurMaskFilter.Blur.NORMAL);
-//                mPaint.setMaskFilter(blur);
-//                mPaint.setAlpha(mPaint.getAlpha() + 150);
-//            }
+            if (mBlur) {
+                final float blurRadius = ((float) bitmapWidth) * 0.01f;
+                final MaskFilter blur = new BlurMaskFilter(blurRadius, BlurMaskFilter.Blur.NORMAL);
+                mPaint.setMaskFilter(blur);
+                mPaint.setAlpha(mPaint.getAlpha() + 150);
+            }
         }
 
     }

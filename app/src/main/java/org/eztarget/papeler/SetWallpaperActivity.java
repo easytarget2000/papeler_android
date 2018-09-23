@@ -44,7 +44,7 @@ public class SetWallpaperActivity extends Activity {
         previewWallpaperIntent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
         previewWallpaperIntent.putExtra(
                 WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                new ComponentName(this, WayprService.class)
+                new ComponentName(this, WallpaperService.class)
         );
 
         try {
