@@ -318,28 +318,13 @@ public class WayprService extends WallpaperService {
                 canvas = holder.lockCanvas();
                 if (canvas != null) {
 
-                    for (int i = 0; i < mBeings.size(); i++) {
+                    if (mResetCanvasOnce) {
+                        mResetCanvasOnce = false;
+                        canvas.drawColor(mBackgroundColor);
+                        mCanvas.drawColor(mBackgroundColor);
 
-                        if (mResetCanvasOnce) {
-                            mResetCanvasOnce = false;
-                            canvas.drawColor(mBackgroundColor);
-                            mCanvas.drawColor(mBackgroundColor);
-                            break;
-                        }
-
-                        final Being being = mBeings.get(i);
-                        final boolean beingGrew = being.update(mIsTouching);
-                        hadAnyMovement |= beingGrew;
-
-                        if (!mIsTouching) {
-                            being.draw(mCanvas, mPaint);
-                        }
-
-                        if (!beingGrew) {
-                            mBeings.remove(i);
-                            Log.d(TAG, "WayprEngine.draw() removing Foliage " + i + ".");
-                        }
-
+                    } else if (!mIsTouching) {
+                        drawBeings();
                     }
                     canvas.drawBitmap(mBitmap, 0f, 0f, null);
 
@@ -362,10 +347,33 @@ public class WayprService extends WallpaperService {
                 Log.d(TAG, "WayprEngine.draw() took " + (System.currentTimeMillis() - startMillis) + "ms.");
             }
 
-            if (hadAnyMovement) {
+            if (updateBeings()) {
                 nextStep();
             } else {
                 Log.d(TAG, "WayprEngine.draw() not calling nextStep().");
+            }
+        }
+
+        private boolean updateBeings() {
+            boolean didUpdateBeings = false;
+            for (int i = 0; i < mBeings.size(); i++) {
+
+                final Being being = mBeings.get(i);
+                final boolean beingGrew = being.update(mIsTouching);
+                didUpdateBeings |= beingGrew;
+
+                if (!beingGrew) {
+                    mBeings.remove(i);
+                    Log.d(TAG, "WayprEngine.draw() removing Foliage " + i + ".");
+                }
+            }
+
+            return didUpdateBeings;
+        }
+
+        private void drawBeings() {
+            for (final Being being : mBeings) {
+                being.draw(mCanvas, mPaint);
             }
         }
 
