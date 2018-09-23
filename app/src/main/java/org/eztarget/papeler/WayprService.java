@@ -2,10 +2,8 @@ package org.eztarget.papeler;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.MaskFilter;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
@@ -14,12 +12,10 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
-import org.eztarget.papeler.engine.BambooTilesBuilder;
 import org.eztarget.papeler.engine.Being;
 import org.eztarget.papeler.engine.BeingBuilder;
-import org.eztarget.papeler.engine.FlowerStickBuilder;
+import org.eztarget.papeler.engine.CubicleBuilder;
 import org.eztarget.papeler.engine.FoliageBuilder;
-import org.eztarget.papeler.engine.LandscapeBuilder;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -177,23 +173,6 @@ public class WayprService extends WallpaperService {
 
             mPaint.setStyle(Paint.Style.STROKE);
 
-//            switch ((int) (Math.random() * 6)) {
-//                case 0:
-//                    final LandscapeBuilder landscapeBuilder = new LandscapeBuilder();
-//                    landscapeBuilder.setCanvasHeight(mHeight);
-//                    mBeingBuilder = landscapeBuilder;
-//                    break;
-//                case 1:
-//                    mBeingBuilder = new CubicleBuilder(Math.min(mWidth, mHeight));
-//                    break;
-//                case 2:
-//                    mBeingBuilder = new BambooTilesBuilder(Math.min(mWidth, mHeight));
-//                    break;
-//                default:
-//                    final boolean canChangeAlpha = !mHasBackgroundImage;
-//                    mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), canChangeAlpha);
-//            }
-
             final boolean canChangeAlpha = !mHasBackgroundImage;
             mBeingBuilder = new FoliageBuilder(Math.min(mWidth, mHeight), canChangeAlpha);
 
@@ -310,12 +289,11 @@ public class WayprService extends WallpaperService {
             }
             final long startMillis = System.currentTimeMillis();
 
-            final SurfaceHolder holder = getSurfaceHolder();
+            final SurfaceHolder surfaceHolder = getSurfaceHolder();
             Canvas canvas = null;
-            boolean hadAnyMovement = false;
 
             try {
-                canvas = holder.lockCanvas();
+                canvas = surfaceHolder.lockCanvas();
                 if (canvas != null) {
 
                     if (mResetCanvasOnce) {
@@ -335,16 +313,21 @@ public class WayprService extends WallpaperService {
             } finally {
                 if (canvas != null) {
                     try {
-                        holder.unlockCanvasAndPost(canvas);
+                        surfaceHolder.unlockCanvasAndPost(canvas);
                     } catch (IllegalArgumentException e) {
                         e.printStackTrace();
                     }
                 }
-                mDrawing = false;
             }
 
+            mDrawing = false;
+
             if (VERBOSE) {
-                Log.d(TAG, "WayprEngine.draw() took " + (System.currentTimeMillis() - startMillis) + "ms.");
+                Log.d(
+                        TAG,
+                        "WayprEngine.draw() took "
+                                + (System.currentTimeMillis() - startMillis) + "ms."
+                );
             }
 
             if (updateBeings()) {
