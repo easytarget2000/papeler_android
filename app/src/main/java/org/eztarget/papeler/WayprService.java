@@ -124,7 +124,7 @@ public class WayprService extends WallpaperService {
 
             nextStep();
 
-            final PreferenceAccess preferences = PreferenceAccess.with(getApplicationContext());
+            final PreferenceAccess preferences = PreferenceAccess.Companion.with(getApplicationContext());
 
             if (preferences.getAndUnsetIsFirstTime()) {
                 final String welcomeMessage = getString(R.string.main_welcome_msg);
@@ -172,7 +172,7 @@ public class WayprService extends WallpaperService {
             mHeight = height;
 
             final Context context = getApplicationContext();
-            mHasBackgroundImage = PreferenceAccess.with(context).hasBackgroundImage();
+            mHasBackgroundImage = PreferenceAccess.Companion.with(context).hasBackgroundImage();
             initCanvas();
 
             mPaint.setStyle(Paint.Style.STROKE);
@@ -225,7 +225,7 @@ public class WayprService extends WallpaperService {
                     e.printStackTrace();
                     Toast.makeText(context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 
-                    PreferenceAccess.with(context).setHasBackgroundImage(false);
+                    PreferenceAccess.Companion.with(context).setHasBackgroundImage(false);
                     initEmtpyCanvas();
                     return;
                 }
@@ -233,7 +233,7 @@ public class WayprService extends WallpaperService {
                 mBitmap = storedBitmap.copy(Bitmap.Config.ARGB_8888, true);
                 mCanvas = new Canvas(mBitmap);
 
-                PreferenceAccess.with(context).acknowledgeNewBackgroundImage();
+                PreferenceAccess.Companion.with(context).acknowledgeNewBackgroundImage();
 
             } else {
                 initEmtpyCanvas();

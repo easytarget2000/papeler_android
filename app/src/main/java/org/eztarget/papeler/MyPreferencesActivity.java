@@ -28,14 +28,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Created by michel@easy-target.org on 23/01/2017.
- *
- * Preferences Activity to be accessed from Live Wallpaper Selection Activity.
- * For selecting or deselecting a background image.
- *
- */
-
 public class MyPreferencesActivity extends AppCompatActivity {
 
     private static final String TAG = MyPreferencesActivity.class.getSimpleName();
@@ -50,7 +42,7 @@ public class MyPreferencesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_preferences);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        if (PreferenceAccess.with(this).hasBackgroundImage()) {
+        if (PreferenceAccess.Companion.with(this).hasBackgroundImage()) {
             showCopiedBackgroundImage();
         }
     }
@@ -196,7 +188,7 @@ public class MyPreferencesActivity extends AppCompatActivity {
     }
 
     private void removeImage() {
-        PreferenceAccess.with(this).setHasBackgroundImage(false);
+        PreferenceAccess.Companion.with(this).setHasBackgroundImage(false);
 
         final ImageView backgroundView = findViewById(R.id.image_prefs_bg);
         backgroundView.setImageBitmap(null);
@@ -239,7 +231,7 @@ public class MyPreferencesActivity extends AppCompatActivity {
         protected void onPostExecute(String errorMessage) {
             super.onPostExecute(errorMessage);
             if (errorMessage == null) {
-                PreferenceAccess.with(MyPreferencesActivity.this).setHasBackgroundImage(true);
+                PreferenceAccess.Companion.with(MyPreferencesActivity.this).setHasBackgroundImage(true);
                 final Button removeImageButton = (Button) findViewById(R.id.button_prefs_delete_img);
                 removeImageButton.setEnabled(true);
 
