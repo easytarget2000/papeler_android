@@ -14,10 +14,13 @@ import java.io.InputStream
 
 internal class BackgroundImageOpener {
 
+    val storageDirRootPath: String = Environment.getExternalStorageDirectory().path
+    val storageFileName = STORAGE_FILE_NAME
+
     val file: File?
         get() {
-            val destinationDir: File
-            destinationDir = File(Environment.getExternalStorageDirectory().path + "/waypr/")
+            val storageDirPath = storageDirRootPath + STORAGE_DIR_RELATIVE_PATH
+            val destinationDir = File(storageDirPath)
             if (destinationDir.exists()) {
                 Log.d(TAG, "Directory " + destinationDir.absolutePath + " exists.")
             } else {
@@ -28,7 +31,7 @@ internal class BackgroundImageOpener {
                 }
             }
 
-            return File(destinationDir, "w.png")
+            return File(destinationDir, storageFileName)
         }
 
     @Throws(Exception::class)
@@ -46,7 +49,6 @@ internal class BackgroundImageOpener {
 
     @Throws(Exception::class)
     fun loadRatioPreserved(targetWidth: Int, targetHeight: Int): Bitmap {
-
         val bitmap = load()
         val sourceWidth = bitmap.width
         val sourceHeight = bitmap.height
@@ -72,6 +74,8 @@ internal class BackgroundImageOpener {
 
     companion object {
         private val TAG = BackgroundImageOpener::class.java.simpleName
+        private const val STORAGE_DIR_RELATIVE_PATH = "/waypr/"
+        private const val STORAGE_FILE_NAME = "w.png"
     }
 
 }
