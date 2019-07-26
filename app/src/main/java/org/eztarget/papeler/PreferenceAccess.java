@@ -3,7 +3,7 @@ package org.eztarget.papeler;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Created by michelsievers on 25/02/2017.

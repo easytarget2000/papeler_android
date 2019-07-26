@@ -2,7 +2,7 @@ package org.eztarget.papeler.engine;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Created by michelsievers on 27/03/2017.
