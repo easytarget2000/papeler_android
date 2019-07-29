@@ -2,27 +2,34 @@ package org.eztarget.papeler.engine
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 
 class BitmapCanvasEngine {
 
-    var width = 0
-    var height = 0
-    var bitmap: Bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-    var canvas: Canvas = Canvas(bitmap)
+    var backgroundColor: Int = Color.parseColor("#FFFFFFFF")
+    var bitmapConfig = Bitmap.Config.ARGB_8888
+    var bitmap: Bitmap = Bitmap.createBitmap(DEFAULT_WIDTH, DEFAULT_HEIGHT, bitmapConfig)
+    var backgroundDrawer: BackgroundCanvasDrawer = BackgroundCanvasDrawer()
 
-    fun clear() {
+    fun updateAndDrawFrameOnCanvas(canvas: Canvas) {
+        val canvasWidth = canvas.width
+        val canvasHeight = canvas.height
+        if (bitmap.width != canvasWidth || bitmap.height != canvasHeight) {
+            bitmap.reconfigure(canvasWidth, canvasHeight, bitmapConfig)
+        }
+        canvas.setBitmap(bitmap)
 
+        drawBackground(canvas)
     }
 
-    fun start(width: Int, height: Int) {
-        this.width = width
-        this.height = height
-
-//        canvas.setBitmap(bitmap)
-        bitmap.reconfigure(width, height, Bitmap.Config.ARGB_8888)
+    private fun drawBackground(canvas: Canvas) {
+        backgroundDrawer.canvas = canvas
+        backgroundDrawer.drawColor(backgroundColor)
+        backgroundDrawer.canvas = null
     }
 
-    fun pause() {
-
+    companion object {
+        private const val DEFAULT_WIDTH = 1920
+        private const val DEFAULT_HEIGHT = 1080
     }
 }
