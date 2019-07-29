@@ -2,10 +2,11 @@ package org.eztarget.papeler
 
 import android.util.Log
 import android.view.SurfaceHolder
+import org.eztarget.papeler.engine.BitmapCanvasEngine
 
 class WallpaperService: android.service.wallpaper.WallpaperService() {
 
-    val engine: org.eztarget.papeler.engine.Engine = org.eztarget.papeler.engine.Engine()
+    val engine: BitmapCanvasEngine = BitmapCanvasEngine()
 
     override fun onCreateEngine(): android.service.wallpaper.WallpaperService.Engine {
         Log.d(tag, "onCreateEngine()")
@@ -30,6 +31,9 @@ class WallpaperService: android.service.wallpaper.WallpaperService() {
                         "onSurfaceChanged(): format: $format, width: $width, height: $height"
                 )
             }
+
+            engine.clear()
+            engine.start(width, height)
         }
 
         override fun onSurfaceDestroyed(holder: SurfaceHolder?) {
@@ -38,6 +42,8 @@ class WallpaperService: android.service.wallpaper.WallpaperService() {
             if (verbose) {
                 Log.d(engineTag, "onSurfaceDestroyed()")
             }
+
+            engine.pause()
         }
 
         override fun onVisibilityChanged(visible: Boolean) {
@@ -45,6 +51,14 @@ class WallpaperService: android.service.wallpaper.WallpaperService() {
 
             if (verbose) {
                 Log.d(engineTag, "onVisibilityChanged(): visible: $visible")
+            }
+
+            if (visible) {
+                val width = super.getDesiredMinimumWidth()
+                val height = super.getDesiredMinimumHeight()
+                engine.start(width, height)
+            } else {
+                engine.pause()
             }
         }
     }
