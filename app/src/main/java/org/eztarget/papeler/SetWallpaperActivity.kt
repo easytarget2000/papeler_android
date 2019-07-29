@@ -38,6 +38,4 @@ class SetWallpaperActivity : Activity() {
 
         didSetWallpaper = true
     }
-
-    fun onClick(view: View) {}
 }
