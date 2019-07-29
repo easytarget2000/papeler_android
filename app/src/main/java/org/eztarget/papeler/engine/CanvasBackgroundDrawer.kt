@@ -2,7 +2,7 @@ package org.eztarget.papeler.engine
 
 import android.graphics.Canvas
 
-class BackgroundCanvasDrawer {
+class CanvasBackgroundDrawer {
 
     var canvas: Canvas? = null
 

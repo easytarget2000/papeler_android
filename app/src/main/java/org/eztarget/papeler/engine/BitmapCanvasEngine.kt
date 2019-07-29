@@ -9,7 +9,7 @@ class BitmapCanvasEngine {
     var backgroundColor: Int = Color.parseColor("#FFFFFFFF")
     var bitmapConfig = Bitmap.Config.ARGB_8888
     var bitmap: Bitmap = Bitmap.createBitmap(DEFAULT_WIDTH, DEFAULT_HEIGHT, bitmapConfig)
-    var backgroundDrawer: BackgroundCanvasDrawer = BackgroundCanvasDrawer()
+    var backgroundDrawer: CanvasBackgroundDrawer = CanvasBackgroundDrawer()
 
     fun updateAndDrawFrameOnCanvas(canvas: Canvas) {
         val canvasWidth = canvas.width
