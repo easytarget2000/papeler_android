@@ -42,9 +42,9 @@ public class MyPreferencesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_preferences);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        if (PreferenceAccess.Companion.with(this).hasBackgroundImage()) {
-            showCopiedBackgroundImage();
-        }
+//        if (PreferenceAccess.Companion.with(this).hasBackgroundImage()) {
+//            showCopiedBackgroundImage();
+//        }
     }
 
     @Override
@@ -165,17 +165,17 @@ public class MyPreferencesActivity extends AppCompatActivity {
 
         hideProgressBar();
 
-        final Bitmap image;
-        try {
-            image = BackgroundImageOpener.load();
-        } catch (Exception e) {
-            Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-            removeImage();
-            return;
-        }
+//        final Bitmap image;
+//        try {
+//            image = BackgroundImageOpener.load();
+//        } catch (Exception e) {
+//            Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+//            removeImage();
+//            return;
+//        }
 
         final ImageView backgroundView = findViewById(R.id.image_prefs_bg);
-        backgroundView.setImageBitmap(image);
+//        backgroundView.setImageBitmap(image);
 
         setRemoveButtonEnabled(true);
     }
@@ -188,7 +188,7 @@ public class MyPreferencesActivity extends AppCompatActivity {
     }
 
     private void removeImage() {
-        PreferenceAccess.Companion.with(this).setHasBackgroundImage(false);
+//        PreferenceAccess.Companion.with(this).setHasBackgroundImage(false);
 
         final ImageView backgroundView = findViewById(R.id.image_prefs_bg);
         backgroundView.setImageBitmap(null);
@@ -231,7 +231,7 @@ public class MyPreferencesActivity extends AppCompatActivity {
         protected void onPostExecute(String errorMessage) {
             super.onPostExecute(errorMessage);
             if (errorMessage == null) {
-                PreferenceAccess.Companion.with(MyPreferencesActivity.this).setHasBackgroundImage(true);
+//                PreferenceAccess.Companion.with(MyPreferencesActivity.this).setHasBackgroundImage(true);
                 final Button removeImageButton = (Button) findViewById(R.id.button_prefs_delete_img);
                 removeImageButton.setEnabled(true);
 
@@ -291,28 +291,28 @@ public class MyPreferencesActivity extends AppCompatActivity {
 
             final Bitmap bitmap = BitmapFactory.decodeStream(imageStream);
 
-            final File destinationFile = BackgroundImageOpener.getFile();
-            if (destinationFile == null) {
-                return "Error 2193";
-            }
+//            final File destinationFile = BackgroundImageOpener.getFile();
+//            if (destinationFile == null) {
+//                return "Error 2193";
+//            }
 
-            FileOutputStream outputStream = null;
-            try {
-                outputStream = new FileOutputStream(destinationFile);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                return e.getLocalizedMessage();
-            } finally {
-                if (outputStream != null) {
-                    try {
-                        outputStream.flush();
-                        outputStream.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+//            FileOutputStream outputStream = null;
+//            try {
+//                outputStream = new FileOutputStream(destinationFile);
+//                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//                return e.getLocalizedMessage();
+//            } finally {
+//                if (outputStream != null) {
+//                    try {
+//                        outputStream.flush();
+//                        outputStream.close();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
 
             return null;
         }

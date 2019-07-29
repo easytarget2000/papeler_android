@@ -2,24 +2,18 @@ package org.eztarget.papeler;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.MaskFilter;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-import android.widget.Toast;
 
-import org.eztarget.papeler.engine.BambooTilesBuilder;
-import org.eztarget.papeler.engine.Being;
-import org.eztarget.papeler.engine.BeingBuilder;
-import org.eztarget.papeler.engine.FlowerStickBuilder;
-import org.eztarget.papeler.engine.FoliageBuilder;
-import org.eztarget.papeler.engine.LandscapeBuilder;
+import org.eztarget.papeler.old_engine.Being;
+import org.eztarget.papeler.old_engine.BeingBuilder;
+import org.eztarget.papeler.old_engine.FoliageBuilder;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -28,9 +22,9 @@ import java.util.Random;
  * Created by michelsievers on 23/01/2017.
  */
 
-public class WayprService extends WallpaperService {
+public class WayprServiceOld extends WallpaperService {
 
-    private static final String TAG = WayprService.class.getSimpleName();
+    private static final String TAG = WayprServiceOld.class.getSimpleName();
 
     private static final boolean CLEAR_FRAME = false;
 
@@ -124,34 +118,34 @@ public class WayprService extends WallpaperService {
 
             nextStep();
 
-            final PreferenceAccess preferences = PreferenceAccess.Companion.with(getApplicationContext());
-
-            if (preferences.getAndUnsetIsFirstTime()) {
-                final String welcomeMessage = getString(R.string.main_welcome_msg);
-                Toast.makeText(WayprService.this, welcomeMessage, Toast.LENGTH_LONG).show();
-
-                final String secondMessage = getString(R.string.main_welcome_msg_2);
-
-                final Toast secondToast;
-                secondToast = Toast.makeText(WayprService.this, secondMessage, Toast.LENGTH_LONG);
-                new Handler().postDelayed(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                secondToast.show();
-                            }
-                        },
-                        3000L
-                );
-            }
-
-            final boolean hasBackgroundImageNow = preferences.hasBackgroundImage();
-            final boolean hasNewBackgroundImage = preferences.hasNewBackgroundImage();
-
-            if (hasBackgroundImageNow != mHasBackgroundImage || hasNewBackgroundImage) {
-                mHasBackgroundImage = hasBackgroundImageNow;
-                initCanvas();
-            }
+//            final PreferenceAccess preferences = PreferenceAccess.Companion.with(getApplicationContext());
+//
+//            if (preferences.getAndUnsetIsFirstTime()) {
+//                final String welcomeMessage = getString(R.string.main_welcome_msg);
+//                Toast.makeText(WayprService.this, welcomeMessage, Toast.LENGTH_LONG).show();
+//
+//                final String secondMessage = getString(R.string.main_welcome_msg_2);
+//
+//                final Toast secondToast;
+//                secondToast = Toast.makeText(WayprService.this, secondMessage, Toast.LENGTH_LONG);
+//                new Handler().postDelayed(
+//                        new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                secondToast.show();
+//                            }
+//                        },
+//                        3000L
+//                );
+//            }
+//
+//            final boolean hasBackgroundImageNow = preferences.hasBackgroundImage();
+//            final boolean hasNewBackgroundImage = preferences.hasNewBackgroundImage();
+//
+//            if (hasBackgroundImageNow != mHasBackgroundImage || hasNewBackgroundImage) {
+//                mHasBackgroundImage = hasBackgroundImageNow;
+//                initCanvas();
+//            }
         }
 
         @Override
@@ -172,7 +166,7 @@ public class WayprService extends WallpaperService {
             mHeight = height;
 
             final Context context = getApplicationContext();
-            mHasBackgroundImage = PreferenceAccess.Companion.with(context).hasBackgroundImage();
+//            mHasBackgroundImage = PreferenceAccess.Companion.with(context).hasBackgroundImage();
             initCanvas();
 
             mPaint.setStyle(Paint.Style.STROKE);
@@ -218,22 +212,22 @@ public class WayprService extends WallpaperService {
             if (mHasBackgroundImage) {
 
                 final Bitmap storedBitmap;
-                try {
-                    storedBitmap = BackgroundImageOpener.loadRatioPreserved(mWidth, mHeight);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-
-                    PreferenceAccess.Companion.with(context).setHasBackgroundImage(false);
-                    initEmtpyCanvas();
-                    return;
-                }
-
-                mBitmap = storedBitmap.copy(Bitmap.Config.ARGB_8888, true);
+//                try {
+//                    storedBitmap = BackgroundImageOpener.loadRatioPreserved(mWidth, mHeight);
+//
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    Toast.makeText(context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+//
+//                    PreferenceAccess.Companion.with(context).setHasBackgroundImage(false);
+//                    initEmtpyCanvas();
+//                    return;
+//                }
+//
+//                mBitmap = storedBitmap.copy(Bitmap.Config.ARGB_8888, true);
                 mCanvas = new Canvas(mBitmap);
 
-                PreferenceAccess.Companion.with(context).acknowledgeNewBackgroundImage();
+//                PreferenceAccess.Companion.with(context).acknowledgeNewBackgroundImage();
 
             } else {
                 initEmtpyCanvas();

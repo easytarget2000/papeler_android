@@ -14,11 +14,6 @@ class SetWallpaperActivity : Activity() {
     var previewWallpaperIntent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER)
     var selectWallpaperIntent = Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.main)
-    }
-
     override fun onResume() {
         super.onResume()
 
@@ -32,7 +27,7 @@ class SetWallpaperActivity : Activity() {
     private fun setWallpaper() {
         previewWallpaperIntent.putExtra(
                 WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                ComponentName(this, WayprService::class.java)
+                ComponentName(this, WallpaperService::class.java)
         )
 
         try {
