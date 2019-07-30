@@ -369,7 +369,7 @@ class OldFoliage extends Being {
         }
 
         private double distance(final Node otherNode) {
-            return Foliage.distance(mX, mY, otherNode.mX, otherNode.mY);
+            return OldFoliage.distance(mX, mY, otherNode.mX, otherNode.mY);
         }
 
         private double angle(final Node otherNode) {

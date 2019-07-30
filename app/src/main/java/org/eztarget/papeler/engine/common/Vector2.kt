@@ -21,49 +21,32 @@
 
 package org.eztarget.papeler.engine.common
 
-data class Float2(var x: Float = 0.0f, var y: Float = 0.0f) {
-    constructor(v: Float) : this(v, v)
-    constructor(v: Float2) : this(v.x, v.y)
+import java.lang.Math.pow
+import kotlin.math.sqrt
 
-    inline var r: Float
+data class Vector2(var x: Double = 0.0, var y: Double = 0.0) {
+    constructor(v: Double) : this(v, v)
+
+    inline var r: Double
         get() = x
         set(value) {
             x = value
         }
-    inline var g: Float
+    inline var g: Double
         get() = y
         set(value) {
             y = value
         }
 
-    inline var s: Float
+    inline var s: Double
         get() = x
         set(value) {
             x = value
         }
-    inline var t: Float
+    inline var t: Double
         get() = y
         set(value) {
             y = value
-        }
-
-    inline var xy: Float2
-        get() = Float2(x, y)
-        set(value) {
-            x = value.x
-            y = value.y
-        }
-    inline var rg: Float2
-        get() = Float2(x, y)
-        set(value) {
-            x = value.x
-            y = value.y
-        }
-    inline var st: Float2
-        get() = Float2(x, y)
-        set(value) {
-            x = value.x
-            y = value.y
         }
 
 //    operator fun get(index: VectorComponent) = when (index) {
@@ -72,8 +55,8 @@ data class Float2(var x: Float = 0.0f, var y: Float = 0.0f) {
 //        else -> throw IllegalArgumentException("index must be X, Y, R, G, S or T")
 //    }
 
-//    operator fun get(index1: VectorComponent, index2: VectorComponent): Float2 {
-//        return Float2(get(index1), get(index2))
+//    operator fun get(index1: VectorComponent, index2: VectorComponent): Vector2 {
+//        return Vector2(get(index1), get(index2))
 //    }
 
     operator fun get(index: Int) = when (index) {
@@ -82,44 +65,44 @@ data class Float2(var x: Float = 0.0f, var y: Float = 0.0f) {
         else -> throw IllegalArgumentException("index must be in 0..1")
     }
 
-    operator fun get(index1: Int, index2: Int) = Float2(get(index1), get(index2))
-
     inline operator fun invoke(index: Int) = get(index - 1)
 
-    operator fun set(index: Int, v: Float) = when (index) {
+    operator fun set(index: Int, v: Double) = when (index) {
         0 -> x = v
         1 -> y = v
         else -> throw IllegalArgumentException("index must be in 0..1")
     }
 
-    operator fun set(index1: Int, index2: Int, v: Float) {
+    operator fun set(index1: Int, index2: Int, v: Double) {
         set(index1, v)
         set(index2, v)
     }
 
-//    operator fun set(index: VectorComponent, v: Float) = when (index) {
+//    operator fun set(index: VectorComponent, v: Double) = when (index) {
 //        VectorComponent.X, VectorComponent.R, VectorComponent.S -> x = v
 //        VectorComponent.Y, VectorComponent.G, VectorComponent.T -> y = v
 //        else -> throw IllegalArgumentException("index must be X, Y, R, G, S or T")
 //    }
 
-//    operator fun set(index1: VectorComponent, index2: VectorComponent, v: Float) {
+//    operator fun set(index1: VectorComponent, index2: VectorComponent, v: Double) {
 //        set(index1, v)
 //        set(index2, v)
 //    }
 
 
-    inline operator fun plus(v: Float) = Float2(x + v, y + v)
-    inline operator fun minus(v: Float) = Float2(x - v, y - v)
-    inline operator fun times(v: Float) = Float2(x * v, y * v)
-    inline operator fun div(v: Float) = Float2(x / v, y / v)
+    inline operator fun plus(v: Double) = Vector2(x + v, y + v)
+    inline operator fun minus(v: Double) = Vector2(x - v, y - v)
+    inline operator fun times(v: Double) = Vector2(x * v, y * v)
+    inline operator fun div(v: Double) = Vector2(x / v, y / v)
 
-    inline operator fun plus(v: Float2) = Float2(x + v.x, y + v.y)
-    inline operator fun minus(v: Float2) = Float2(x - v.x, y - v.y)
-    inline operator fun times(v: Float2) = Float2(x * v.x, y * v.y)
-    inline operator fun div(v: Float2) = Float2(x / v.x, y / v.y)
+    inline operator fun plus(v: Vector2) = Vector2(x + v.x, y + v.y)
+    inline operator fun minus(v: Vector2) = Vector2(x - v.x, y - v.y)
+    inline operator fun times(v: Vector2) = Vector2(x * v.x, y * v.y)
+    inline operator fun div(v: Vector2) = Vector2(x / v.x, y / v.y)
 
-    inline fun transform(block: (Float) -> Float): Float2 {
+    inline fun distance(v: Vector2) = sqrt(pow(x - v.x, 2.0) + pow(y - v.y, 2.0))
+
+    inline fun transform(block: (Double) -> Double): Vector2 {
         x = block(x)
         y = block(y)
         return this

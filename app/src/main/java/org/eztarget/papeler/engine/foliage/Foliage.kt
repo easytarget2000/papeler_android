@@ -1,5 +1,6 @@
 package org.eztarget.papeler.engine.foliage
 
+import org.eztarget.papeler.BuildConfig
 import org.eztarget.papeler.old_engine.Being
 import org.w3c.dom.Node
 import kotlin.math.*
@@ -75,7 +76,8 @@ class Foliage {
 
                     val absoluteNodeIndex = (circleIndex * numOfNodesPerCircle) + relativeNodeIndex
                     if (absoluteNodeIndex == numOfInitialNodes - 1) {
-                        preferredNeighbourDistance = node.distance(lastNode)
+                        val distanceToLastNode = currentNode.distanceToOtherNode(lastNode)
+                        preferredNeighbourDistance = distanceToLastNode
                         currentNode.nextNode = firstNode
                         return
                     }
@@ -101,6 +103,7 @@ class Foliage {
 
     companion object {
         private val tag = Foliage::class.java.simpleName
+        private val verbose = BuildConfig.DEBUG
         private const val TWO_PI = PI * 2.0
         private const val MIN_NODE_DENSITY = 1
         private const val MAX_NODE_DENSITY = 11
