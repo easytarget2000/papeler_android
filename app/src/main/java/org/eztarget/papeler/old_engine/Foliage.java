@@ -6,7 +6,9 @@ import android.graphics.Path;
 import androidx.annotation.NonNull;
 import android.util.Log;
 
-class Foliage extends Being {
+import org.eztarget.papeler.engine.foliage.Foliage;
+
+class OldFoliage extends Being {
 
     private static final String TAG = Foliage.class.getSimpleName();
 

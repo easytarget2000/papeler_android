@@ -1,4 +1,4 @@
-package org.eztarget.papeler.engine
+package org.eztarget.papeler.engine.common
 
 import android.graphics.Canvas
 

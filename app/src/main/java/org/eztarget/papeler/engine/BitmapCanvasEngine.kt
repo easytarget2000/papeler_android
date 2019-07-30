@@ -3,6 +3,7 @@ package org.eztarget.papeler.engine
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import org.eztarget.papeler.engine.common.CanvasBackgroundDrawer
 
 class BitmapCanvasEngine {
 
