@@ -1,5 +1,6 @@
 package org.eztarget.papeler.engine
 
+import android.graphics.Color
 import android.os.Handler
 import android.util.Log
 import android.view.SurfaceHolder
@@ -41,7 +42,7 @@ class ServiceCoordinator {
 
         val canvas = surfaceHolder?.lockCanvas() ?: return
         engine.setup(canvas)
-        engine.updateAndDrawFrameOnCanvas(canvas)
+//        engine.updateAndDrawFrameOnCanvas(canvas)
         surfaceHolder?.unlockCanvasAndPost(canvas)
     }
 

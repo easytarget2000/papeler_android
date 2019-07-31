@@ -1,5 +1,6 @@
 package org.eztarget.papeler
 
+import android.graphics.Color
 import android.util.Log
 import android.view.SurfaceHolder
 import org.eztarget.papeler.engine.ServiceCoordinator
@@ -35,6 +36,10 @@ class WallpaperService : android.service.wallpaper.WallpaperService() {
             } else {
                 engineCoordinator.stop()
             }
+
+//            val canvas = holder?.lockCanvas()
+//            canvas?.drawColor(Color.RED)
+//            holder?.unlockCanvasAndPost(canvas)
 
             super.onSurfaceChanged(holder, format, width, height)
         }
