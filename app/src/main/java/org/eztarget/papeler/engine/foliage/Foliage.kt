@@ -1,27 +1,28 @@
 package org.eztarget.papeler.engine.foliage
 
-import android.graphics.Paint
-import android.graphics.Path
 import org.eztarget.papeler.BuildConfig
-import org.eztarget.papeler.old_engine.Being
-import org.w3c.dom.Node
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.random.Random
 
-class Foliage {
+class Foliage(worldSize: Double, randomNumberGenerator: Random = Random.Default) {
 
     var maxAge = 240
+    var nodeRadius: Double = worldSize / 600.0
     var totalNodeCounter = 0
+    var numOfInitialNodes = 64
     var maxNumOfTotalNodes = 512
     var nodesAddedPerRoundLimit = 8
     var nodeDensity: Int
     var neighbourGravity: Double
     var preferredNeighbourDistance = 0.0
     var maxPushDistance: Double
+    var pushForce = 8.0
+    var moving = true
     private lateinit var firstNode: FoliageNode
 
-    constructor(worldSize: Double, randomNumberGenerator: Random = Random.Default) {
-        val nodeRadius = worldSize / 600.0
+    init {
         neighbourGravity = nodeRadius * NODE_RADIUS_TO_GRAVITY_RATIO
         maxPushDistance = worldSize * WORLD_SIZE_TO_PUSH_DISTANCE_RATIO
         nodeDensity = randomNumberGenerator.nextInt(
@@ -33,9 +34,7 @@ class Foliage {
     fun initNodesInCircles(
             x: Double,
             y: Double,
-            numOfInitialNodes: Int,
             worldSize: Double,
-            maxJitter: Double,
             randomNumberGenerator: Random = Random.Default
     ) {
         val numberOfCircles = randomNumberGenerator.nextInt(
@@ -45,6 +44,7 @@ class Foliage {
         val numOfNodesPerCircle = numOfInitialNodes / numberOfCircles
         val minCircleRadius = worldSize * WORLD_SIZE_TO_MIN_CIRCLE_RADIUS_RATIO
         val maxCircleRadius = worldSize * WORLD_SIZE_TO_MAX_CIRCLE_RADIUS_RATIO
+        val maxJitter = worldSize * WORLD_SIZE_TO_JITTER_RATIO
 
         var lastNode: FoliageNode? = null
         for (circleIndex in 0 until numberOfCircles) {
@@ -63,8 +63,7 @@ class Foliage {
 
             for (relativeNodeIndex in 0 until numOfNodesPerCircle) {
 
-                val angleOfNode = TWO_PI
-                * ((relativeNodeIndex + 1).toDouble() / numOfNodesPerCircle.toDouble())
+                val angleOfNode = TWO_PI * ((relativeNodeIndex + 1).toDouble() / numOfNodesPerCircle.toDouble())
 
                 val nodeX = (circleCenterX
                         + cos(angleOfNode).toFloat() * radius * squeezeFactor
@@ -73,7 +72,7 @@ class Foliage {
                         + sin(angleOfNode).toFloat() * radius
                         + jitter(maxJitter, randomNumberGenerator))
 
-                val currentNode = FoliageNode(nodeX, nodeY)
+                val currentNode = FoliageNode(nodeX, nodeY, nodeRadius)
 
                 if (lastNode == null) {
                     firstNode = currentNode
@@ -96,7 +95,11 @@ class Foliage {
 
     fun updateNodes(addNodes: Boolean = true) {
         iterateNodes {
-            it.update()
+            if (!moving) {
+                return@iterateNodes
+            }
+
+            it.update(maxPushDistance, preferredNeighbourDistance, pushForce, neighbourGravity)
             if (addNodes
                     && totalNodeCounter < maxNumOfTotalNodes
                     && ++totalNodeCounter % nodeDensity == 0
@@ -119,7 +122,7 @@ class Foliage {
         val oldNeighbour = node.nextNode ?: return
 
         val newNeighbourVector = node.positionVector.between(oldNeighbour.positionVector)
-        val newNeighbour = FoliageNode(newNeighbourVector)
+        val newNeighbour = FoliageNode(newNeighbourVector, nodeRadius)
         node.nextNode = newNeighbour
         newNeighbour.nextNode = oldNeighbour
     }

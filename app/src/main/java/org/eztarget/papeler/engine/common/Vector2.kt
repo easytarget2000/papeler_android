@@ -22,9 +22,9 @@
 package org.eztarget.papeler.engine.common
 
 import java.lang.Math.pow
-import kotlin.math.sqrt
+import kotlin.math.*
 
-data class Vector2(var x: Double = 0.0, var y: Double = 0.0) {
+data class Vector2(val x: Double = 0.0, val y: Double = 0.0) {
 
     operator fun get(index: Int) = when (index) {
         0 -> x
@@ -32,21 +32,25 @@ data class Vector2(var x: Double = 0.0, var y: Double = 0.0) {
         else -> throw IllegalArgumentException("index must be in 0..1")
     }
 
-    inline operator fun invoke(index: Int) = get(index - 1)
-
-    operator fun set(index: Int, v: Double) = when (index) {
-        0 -> x = v
-        1 -> y = v
-        else -> throw IllegalArgumentException("index must be in 0..1")
-    }
-
-    operator fun set(index1: Int, index2: Int, v: Double) {
-        set(index1, v)
-        set(index2, v)
-    }
-
     fun between(v2: Vector2): Vector2 {
         return (this + v2) / 2.0
+    }
+
+    fun move(distance: Double, angle: Double): Vector2 {
+        return Vector2(
+                x = x + (cos(angle) * distance),
+                y = y + (sin(angle) * distance)
+        )
+    }
+
+    fun angle(v2: Vector2): Double {
+        val calcAngle = atan2(y = -(y - v2.y), x = v2.x - x)
+
+        return if (calcAngle < 0) {
+            calcAngle + TWO_PI
+        } else {
+            calcAngle
+        }
     }
 
     inline operator fun plus(v: Double) = Vector2(x + v, y + v)
@@ -61,5 +65,7 @@ data class Vector2(var x: Double = 0.0, var y: Double = 0.0) {
 
     inline fun distance(v: Vector2) = sqrt(pow(x - v.x, 2.0) + pow(y - v.y, 2.0))
 
-
+    companion object {
+        private const val TWO_PI = 2.0 * PI
+    }
 }

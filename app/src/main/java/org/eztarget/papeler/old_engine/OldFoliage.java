@@ -48,7 +48,7 @@ class OldFoliage extends Being {
 
 //    private NewNode mSpecialNode;
 
-    Foliage(final double canvasSize, final boolean canChangeAlpha) {
+    OldFoliage(final double canvasSize, final boolean canChangeAlpha) {
         mCanvasSize = canvasSize;
         final double nodeSize = canvasSize / 300f;
         mNodeRadius = nodeSize * 0.5f;
@@ -77,7 +77,7 @@ class OldFoliage extends Being {
 //        }
     }
 
-    Foliage initSquare(final float x, final float y) {
+    OldFoliage initSquare(final float x, final float y) {
         final double sideLength = random(mCanvasSize * 0.15) + (mCanvasSize * 0.01);
         final double sideLengthHalf = sideLength * 0.5;
 
@@ -128,7 +128,7 @@ class OldFoliage extends Being {
         return this;
     }
 
-    Foliage initCircle(final double x, final double y) {
+    OldFoliage initCircle(final double x, final double y) {
 
         final int numberOfCircles = mRandom.nextInt(5) + 1;
 
@@ -172,7 +172,7 @@ class OldFoliage extends Being {
     }
 
 
-    Foliage initPolygon(final double x, final double y) {
+    OldFoliage initPolygon(final double x, final double y) {
 
         final int numberOfEdges = mRandom.nextInt(5) + 3;
         final int nodesPerEdge = NUM_OF_INITIAL_NODES / numberOfEdges;
@@ -373,7 +373,7 @@ class OldFoliage extends Being {
         }
 
         private double angle(final Node otherNode) {
-            return Foliage.angle(mX, mY, otherNode.mX, otherNode.mY);
+            return OldFoliage.angle(mX, mY, otherNode.mX, otherNode.mY);
         }
 
         private void update(final boolean applyForces) {
@@ -438,23 +438,6 @@ class OldFoliage extends Being {
             } while (!mStopped);
         }
 
-    }
-
-    private class NewNode extends Node {
-
-        private NewNode(final double x, final double y) {
-            mX = x;
-            mY = y;
-
-//            mAccelerationScale = mCanvasSize * 0.01 * mRandom.nextFloat();
-//            mAccelerationAngle = mRandom.nextFloat() * TWO_PI;
-        }
-
-        @Override
-        protected void updateAcceleration() {
-            mX *= 0.9;
-            mY += mCanvasSize * 0.01;
-        }
     }
 
 }

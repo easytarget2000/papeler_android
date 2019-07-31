@@ -4,7 +4,6 @@ import android.os.Handler
 import android.util.Log
 import android.view.SurfaceHolder
 import org.eztarget.papeler.WallpaperService
-import org.eztarget.papeler.WallpaperService.Companion.tag
 
 class ServiceCoordinator {
 
@@ -41,6 +40,7 @@ class ServiceCoordinator {
         }
 
         val canvas = surfaceHolder?.lockCanvas() ?: return
+        engine.setup(canvas)
         engine.updateAndDrawFrameOnCanvas(canvas)
         surfaceHolder?.unlockCanvasAndPost(canvas)
     }
