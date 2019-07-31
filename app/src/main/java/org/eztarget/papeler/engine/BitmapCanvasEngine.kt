@@ -12,19 +12,18 @@ class BitmapCanvasEngine(
         val foliageGenerator: CanvasFoliageGenerator = CanvasFoliageGenerator()
 ) {
     var backgroundColor: Int = Color.RED//Color.parseColor("#FFFF00FF")
-    var bitmapConfig = Bitmap.Config.ARGB_8888
-    var bitmap: Bitmap = Bitmap.createBitmap(DEFAULT_WIDTH, DEFAULT_HEIGHT, bitmapConfig)
+//    var bitmapConfig = Bitmap.Config.ARGB_8888
+//    var bitmap: Bitmap = Bitmap.createBitmap(DEFAULT_WIDTH, DEFAULT_HEIGHT, bitmapConfig)
 
     fun setup(canvas: Canvas) {
         bindBitmapToCanvas(canvas)
-        canvas.drawColor(Color.GREEN)
-//        drawBackground(canvas)
-//        foliageGenerator.initFoliages(sizeOfCanvas(canvas))
+        drawBackground(canvas)
+        foliageGenerator.initFoliages(sizeOfCanvas(canvas))
     }
 
     fun updateAndDrawFrameOnCanvas(canvas: Canvas) {
         bindBitmapToCanvas(canvas)
-//        updateAndDrawFoliages(canvas)
+        updateAndDrawFoliages(canvas)
     }
 
     private fun bindBitmapToCanvas(canvas: Canvas) {

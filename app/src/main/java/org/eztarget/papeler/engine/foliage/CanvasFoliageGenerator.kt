@@ -38,7 +38,7 @@ class CanvasFoliageGenerator(
                 return@iterateNodes
             }
             nodeDrawer.canvas = canvas
-//            nodeDrawer.drawNode(it)
+            nodeDrawer.drawNode(it)
             nodeDrawer.canvas = null
         }
     }

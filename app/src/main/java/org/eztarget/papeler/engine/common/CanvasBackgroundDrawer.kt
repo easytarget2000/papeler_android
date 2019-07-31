@@ -8,6 +8,6 @@ class CanvasBackgroundDrawer {
     var canvas: Canvas? = null
 
     fun drawColor(color: Int) {
-        canvas!!.drawColor(color, PorterDuff.Mode.ADD)
+        canvas!!.drawColor(color)
     }
 }

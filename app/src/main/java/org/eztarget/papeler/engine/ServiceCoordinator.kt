@@ -20,6 +20,11 @@ class ServiceCoordinator {
 
     fun start(serviceEngine: WallpaperService.Engine) {
         this.serviceEngine = serviceEngine
+
+        val canvas = surfaceHolder?.lockCanvas() ?: return
+        engine.setup(canvas)
+        surfaceHolder?.unlockCanvasAndPost(canvas)
+
         updateAndDrawFrameAndSchedule()
     }
 
@@ -41,8 +46,7 @@ class ServiceCoordinator {
         }
 
         val canvas = surfaceHolder?.lockCanvas() ?: return
-        engine.setup(canvas)
-//        engine.updateAndDrawFrameOnCanvas(canvas)
+        engine.updateAndDrawFrameOnCanvas(canvas)
         surfaceHolder?.unlockCanvasAndPost(canvas)
     }
 
@@ -55,7 +59,7 @@ class ServiceCoordinator {
     }
 
     companion object {
-        const val DEFAULT_UPDATE_AND_DRAW_INTERVAL_MILLIS = 2000L
+        const val DEFAULT_UPDATE_AND_DRAW_INTERVAL_MILLIS = 20L
         val tag = ServiceCoordinator::class.java.simpleName
     }
 }
